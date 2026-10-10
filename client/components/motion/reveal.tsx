@@ -21,8 +21,6 @@ type RevealProps = {
   y?: number
 }
 
-// Content renders visible on the server; motion only hides it after hydration when it is still off-screen,
-// so slow connections never see blank sections.
 export function Reveal({ children, as: Tag = "div", className, delay = 0, y = 28 }: RevealProps) {
   const ref = useRef<HTMLElement>(null)
 
