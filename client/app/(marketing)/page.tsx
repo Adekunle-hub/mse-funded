@@ -33,7 +33,7 @@ export default async function HomePage() {
       <Hero snapshot={snapshot} now={now} />
       <ClosingSoon snapshot={snapshot} now={now} />
       <FieldExplorer snapshot={snapshot} />
-      <VerificationSection />
+      <VerificationSection example={snapshot.example} now={now} />
       <MsePrimer />
       <HowItWorks />
       <DeadlineCalendar snapshot={snapshot} />
