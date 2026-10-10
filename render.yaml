@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: msefunded-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: server
+    buildCommand: npm ci --include=dev && npm run build && npx prisma migrate deploy
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NODE_ENV
+        value: production
+      - key: RUN_WORKERS
+        value: "false"
+      - key: RUN_SCHEDULES
+        value: "false"
+      - key: CLIENT_ORIGIN
+        value: https://msefunded.orbgnost.com
+      - key: API_URL
+        value: https://api.msefunded.orbgnost.com
+      - key: EMAIL_FROM
+        value: MseFunded <dev@orbgnost.com>
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REVALIDATE_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
