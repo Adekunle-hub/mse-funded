@@ -74,8 +74,7 @@ export function ReportDialog({ scholarshipId, layout }: ReportDialogProps) {
             </span>
             <DialogTitle>Thanks for telling us</DialogTitle>
             <DialogDescription>
-              A person will check this within 1 working day. If we find a problem, we&apos;ll mark the listing
-              for everyone.
+              We&apos;ll look into it. If we find a problem, we&apos;ll mark the listing for everyone.
             </DialogDescription>
             <DialogClose render={<Button variant="outline" className="mt-2 w-full sm:w-auto" />}>Done</DialogClose>
           </div>
