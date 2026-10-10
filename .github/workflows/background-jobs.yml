@@ -1,0 +1,91 @@
+name: Background jobs
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"
+    - cron: "0 4 * * *"
+    - cron: "0 5 * * *"
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: Which job to run
+        type: choice
+        options: [pipeline, recheck, discover, remind, cleanup]
+        default: pipeline
+
+concurrency:
+  group: background-jobs
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    defaults:
+      run:
+        working-directory: server
+    env:
+      NODE_ENV: production
+      RUN_SCHEDULES: "false"
+      REDIS_URL: redis://localhost:6379
+      CLIENT_ORIGIN: https://msefunded.orbgnost.com
+      API_URL: https://api.msefunded.orbgnost.com
+      EMAIL_FROM: MseFunded <dev@orbgnost.com>
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Choose the job for this run
+        id: task
+        run: |
+          case "${{ github.event.schedule }}" in
+            "0 4 * * *") task=recheck ;;
+            "0 5 * * *") task=discover ;;
+            "0 7 * * *") task=remind ;;
+            "0 */3 * * *") task=pipeline ;;
+            *) task="${{ inputs.task }}" ;;
+          esac
+          echo "task=${task:-pipeline}" >> "$GITHUB_OUTPUT"
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Crawl, read with Claude and verify
+        if: steps.task.outputs.task == 'pipeline'
+        run: |
+          npm run crawl
+          npm run extract
+          npm run verify
+
+      - name: Re-check live listings
+        if: steps.task.outputs.task == 'recheck'
+        run: npm run recheck
+
+      - name: Discover new pages
+        if: steps.task.outputs.task == 'discover'
+        run: npm run discover
+
+      - name: Send deadline reminders
+        if: steps.task.outputs.task == 'remind'
+        run: npm run remind
+
+      - name: Clean up old page copies
+        if: steps.task.outputs.task == 'remind' || steps.task.outputs.task == 'cleanup'
+        run: npm run cleanup
