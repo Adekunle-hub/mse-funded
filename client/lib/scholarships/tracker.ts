@@ -12,19 +12,25 @@ export const statusLabels: Record<ApplicationStatus, string> = {
 
 export const statusOrder: ApplicationStatus[] = ["interested", "applying", "submitted"]
 
+function deadlineTime(entry: SavedScholarship) {
+  const { deadline } = entry.scholarship
+  return deadline ? new Date(deadline).getTime() : Number.POSITIVE_INFINITY
+}
+
 export function isClosed(entry: SavedScholarship, now: Date) {
-  return new Date(entry.scholarship.deadline).getTime() < now.getTime()
+  return deadlineTime(entry) < now.getTime()
 }
 
 export function daysLeft(entry: SavedScholarship, now: Date) {
-  return calendarDaysBetween(now, new Date(entry.scholarship.deadline))
+  const { deadline } = entry.scholarship
+  return deadline ? calendarDaysBetween(now, new Date(deadline)) : Number.POSITIVE_INFINITY
 }
 
 export function sortEntries(entries: SavedScholarship[], sort: TrackerSort) {
   return [...entries].sort((a, b) =>
     sort === "saved"
       ? new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
-      : new Date(a.scholarship.deadline).getTime() - new Date(b.scholarship.deadline).getTime()
+      : deadlineTime(a) - deadlineTime(b) || 0
   )
 }
 
