@@ -22,7 +22,7 @@ type HeroProps = {
 export function Hero({ snapshot, now }: HeroProps) {
   const stats = [
     { value: snapshot.openCount, label: "Open funded places" },
-    { value: snapshot.institutionCount, label: "Universities and funders" },
+    { value: snapshot.institutionCount, label: "Universities and founders" },
     { value: snapshot.countryCount, label: "Countries" },
   ]
   const next = snapshot.nextDeadline
@@ -36,7 +36,7 @@ export function Hero({ snapshot, now }: HeroProps) {
       <div className="container-page pt-10 pb-8 text-center sm:pt-16 lg:pt-20 lg:pb-12">
         <p className="hero-in inline-flex items-center gap-2 rounded-md border border-hairline bg-surface/90 px-3 py-1.5 type-label text-ink">
           <span className="live-dot size-2 rounded-[2px] bg-teal" />
-          Every link checked by a person
+          Every listing from an official page
           <span className="font-normal text-ink-muted">· updated daily</span>
         </p>
 
