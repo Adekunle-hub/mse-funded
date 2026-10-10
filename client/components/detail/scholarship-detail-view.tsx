@@ -29,7 +29,7 @@ export async function ScholarshipDetailView({ params }: ScholarshipDetailViewPro
   const [scholarship, now] = await Promise.all([getScholarship(id), getRenderTime()])
   if (!scholarship) notFound()
 
-  const closed = new Date(scholarship.deadline).getTime() < now.getTime()
+  const closed = scholarship.deadline !== null && new Date(scholarship.deadline).getTime() < now.getTime()
   const funderLine = [scholarship.institution, scholarship.department, scholarship.funder]
     .filter(Boolean)
     .join(" · ")
@@ -62,7 +62,7 @@ export async function ScholarshipDetailView({ params }: ScholarshipDetailViewPro
 
             <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 type-body-sm lg:mt-4">
               <TrustLabel verification={scholarship.verification} />
-              <span className="text-ink-muted max-sm:hidden">· Official page checked by a person</span>
+              <span className="text-ink-muted max-sm:hidden">· From the official page</span>
             </p>
             <HowWeCheck checkedAt={scholarship.verification.checkedAt} />
 
