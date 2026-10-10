@@ -56,10 +56,11 @@ export function monthDayParts(value: Date | string) {
 }
 
 export function formatDeadlineMoment(
-  deadline: string,
+  deadline: string | null,
   zone: { id: string; label: string },
   { withYear = true, short = false }: { withYear?: boolean; short?: boolean } = {}
 ) {
+  if (!deadline) return "No fixed deadline"
   const date = new Date(deadline)
   const sourceDate = formatDate(date, { timeZone: zone.id, withYear })
   const sourceTime = formatTime(date, zone.id)
