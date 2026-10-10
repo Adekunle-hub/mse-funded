@@ -19,7 +19,9 @@ export async function generateMetadata({ params }: PageProps<"/scholarships/[id]
   if (!scholarship) return { title: "Scholarship not found", robots: { index: false } }
 
   const title = `${scholarship.title}, ${scholarship.institution}`
-  const description = `${studyLevelLabels[scholarship.level]} in ${scholarship.fields.join(", ").toLowerCase()} at ${scholarship.institution}, ${scholarship.country}. ${scholarship.fundingSummary}. Deadline ${formatDate(scholarship.deadline)}. Official link, checked eligibility and deadline.`
+  const fields = scholarship.fields.length > 0 ? ` in ${scholarship.fields.join(", ").toLowerCase()}` : ""
+  const deadline = scholarship.deadline ? `Deadline ${formatDate(scholarship.deadline)}.` : "No fixed deadline."
+  const description = `${studyLevelLabels[scholarship.level]}${fields} at ${scholarship.institution}, ${scholarship.country}. ${scholarship.fundingSummary}. ${deadline} Official link and eligibility from the funder's page.`
   const url = routes.scholarship(scholarship.id)
 
   return {
