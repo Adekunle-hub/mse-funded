@@ -31,7 +31,8 @@
     "extract": "node dist/extract",
     "recheck": "node dist/recheck",
     "make-admin": "node dist/make-admin",
-    "remind": "node dist/remind"
+    "remind": "node dist/remind",
+    "cleanup": "node dist/cleanup"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",
