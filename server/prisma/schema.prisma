@@ -1,0 +1,289 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SourceKind {
+  HTML
+  LISTING
+  RSS
+  SITEMAP
+  MANUAL
+}
+
+enum SourceOrigin {
+  SEED
+  LISTING
+  SEARCH
+  SUBMITTED
+}
+
+model Source {
+  id                   String       @id @default(uuid()) @db.Uuid
+  name                 String
+  url                  String       @unique
+  kind                 SourceKind   @default(HTML)
+  origin               SourceOrigin @default(SEED)
+  isActive             Boolean      @default(true)
+  crawlIntervalMinutes Int          @default(1440)
+  robotsAllowed        Boolean?
+  lastCrawledAt        DateTime?
+  lastStatus           Int?
+  lastError            String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  rawPages RawPage[]
+
+  @@index([isActive, lastCrawledAt])
+}
+
+enum ExtractionStatus {
+  PENDING
+  EXTRACTED
+  NOT_A_SCHOLARSHIP
+  FAILED
+}
+
+model RawPage {
+  id               String           @id @default(uuid()) @db.Uuid
+  sourceId         String?          @db.Uuid
+  url              String
+  finalUrl         String?
+  httpStatus       Int
+  contentType      String?
+  contentHash      String
+  body             String
+  fetchedAt        DateTime         @default(now())
+  extractionStatus ExtractionStatus @default(PENDING)
+  extractedAt      DateTime?
+  extractionError  String?
+
+  source        Source?                @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  scholarships  Scholarship[]
+  opportunities ExtractedOpportunity[]
+  llmUsage      LlmUsage[]
+
+  @@unique([url, contentHash])
+  @@index([extractionStatus, fetchedAt])
+  @@index([sourceId, fetchedAt])
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  MERGED
+  NEEDS_REVIEW
+  REJECTED
+}
+
+model ExtractedOpportunity {
+  id            String       @id @default(uuid()) @db.Uuid
+  rawPageId     String       @db.Uuid
+  title         String
+  institution   String
+  level         StudyLevel
+  deadline      DateTime?
+  data          Json
+  status        ReviewStatus @default(PENDING)
+  note          String?
+  scholarshipId String?      @db.Uuid
+  createdAt     DateTime     @default(now())
+
+  rawPage     RawPage      @relation(fields: [rawPageId], references: [id], onDelete: Cascade)
+  scholarship Scholarship? @relation(fields: [scholarshipId], references: [id], onDelete: SetNull)
+
+  @@index([rawPageId])
+  @@index([institution, title])
+  @@index([status])
+}
+
+model LlmUsage {
+  id           String   @id @default(uuid()) @db.Uuid
+  rawPageId    String?  @db.Uuid
+  stage        String
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  createdAt    DateTime @default(now())
+
+  rawPage RawPage? @relation(fields: [rawPageId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}
+
+enum StudyLevel {
+  MSC
+  PHD
+  MSC_PHD
+}
+
+enum FundingType {
+  FULLY_FUNDED
+  TUITION_ONLY
+  STIPEND_ONLY
+  PARTIAL
+}
+
+enum ListingStatus {
+  DRAFT
+  PUBLISHED
+  UNDER_REVIEW
+  REJECTED
+}
+
+model Scholarship {
+  id                String        @id @default(uuid()) @db.Uuid
+  slug              String        @unique
+  name              String
+  funder            String
+  institution       String
+  department        String?
+  country           String
+  city              String?
+  level             StudyLevel
+  fundingType       FundingType
+  fields            String[]
+  fundingSummary    String
+  fundingCovers     String?
+  durationLabel     String?
+  startDate         String?
+  openTo            String?
+  openToNigerians   Boolean       @default(false)
+  intakeYear        Int
+  deadline          DateTime?
+  deadlineTimeZone  String
+  deadlineZoneLabel String
+  eligibility       String[]
+  about             String[]
+  howToApply        String[]
+  officialUrl       String
+  status            ListingStatus @default(DRAFT)
+  verifiedAt        DateTime?
+  reviewNote        String?
+  lastLinkCheckAt   DateTime?
+  lastLinkStatus    Int?
+  rawPageId         String?       @db.Uuid
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  rawPage       RawPage?               @relation(fields: [rawPageId], references: [id], onDelete: SetNull)
+  savedBy       SavedScholarship[]
+  opportunities ExtractedOpportunity[]
+
+  @@unique([funder, name, intakeYear])
+  @@index([status, deadline])
+  @@index([country])
+  @@index([level])
+  @@index([fundingType])
+  @@index([fields], type: Gin)
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+model User {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  name            String
+  passwordHash    String?
+  googleId        String?   @unique
+  role            UserRole  @default(STUDENT)
+  emailVerifiedAt DateTime?
+  timeZone        String    @default("Africa/Lagos")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  saved         SavedScholarship[]
+  refreshTokens RefreshToken[]
+  resetTokens   PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum ApplicationStatus {
+  INTERESTED
+  APPLYING
+  SUBMITTED
+}
+
+model SavedScholarship {
+  id            String            @id @default(uuid()) @db.Uuid
+  userId        String            @db.Uuid
+  scholarshipId String            @db.Uuid
+  status        ApplicationStatus @default(INTERESTED)
+  note          String            @default("")
+  remindersOn   Boolean           @default(true)
+  submittedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+  reminders   Reminder[]
+
+  @@unique([userId, scholarshipId])
+  @@index([userId, status])
+}
+
+enum ReminderChannel {
+  EMAIL
+  TELEGRAM
+  WHATSAPP
+}
+
+enum ReminderStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model Reminder {
+  id                 String          @id @default(uuid()) @db.Uuid
+  savedScholarshipId String          @db.Uuid
+  channel            ReminderChannel
+  daysBefore         Int
+  scheduledFor       DateTime
+  status             ReminderStatus  @default(PENDING)
+  attempts           Int             @default(0)
+  sentAt             DateTime?
+  lastError          String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  savedScholarship SavedScholarship @relation(fields: [savedScholarshipId], references: [id], onDelete: Cascade)
+
+  @@unique([savedScholarshipId, channel, daysBefore])
+  @@index([status, scheduledFor])
+}
