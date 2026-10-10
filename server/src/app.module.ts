@@ -9,6 +9,7 @@ import { AdminModule } from './admin/admin.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { AppConfigModule } from './config/app-config.module.js';
 import type { Env } from './config/env.js';
+import { runSchedules } from './config/jobs.js';
 import { CrawlerModule } from './crawler/crawler.module.js';
 import { DiscoveryModule } from './discovery/discovery.module.js';
 import { ExtractionModule } from './extraction/extraction.module.js';
@@ -25,7 +26,7 @@ import { VerificationModule } from './verification/verification.module.js';
   imports: [
     AppConfigModule,
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
-    ScheduleModule.forRoot(),
+    ...(runSchedules ? [ScheduleModule.forRoot()] : []),
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => ({
