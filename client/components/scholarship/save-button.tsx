@@ -1,10 +1,13 @@
 "use client"
 
+import { usePathname, useRouter } from "next/navigation"
 import { motion } from "motion/react"
 import { Bookmark } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { useCurrentUser } from "@/hooks/use-auth"
 import { useSavedEntry, useToggleSave } from "@/hooks/use-saved"
+import { signupToSave } from "@/lib/routes"
 import type { ScholarshipSummary } from "@/lib/types/scholarship"
 import { cn } from "@/lib/utils"
 
@@ -21,8 +24,11 @@ const layoutClasses = {
 }
 
 export function SaveButton({ scholarship, layout = "card", className }: SaveButtonProps) {
+  const { user, isLoading } = useCurrentUser()
   const { entry, isPending } = useSavedEntry(scholarship.id)
   const toggle = useToggleSave()
+  const router = useRouter()
+  const pathname = usePathname()
   const saved = Boolean(entry)
   const label = saved ? "Saved" : "Save"
   const showsText = layout === "block"
@@ -33,6 +39,11 @@ export function SaveButton({ scholarship, layout = "card", className }: SaveButt
       aria-pressed={saved}
       aria-label={showsText ? undefined : saved ? `Saved: ${scholarship.title}` : `Save ${scholarship.title}`}
       onClick={() => {
+        if (isLoading) return
+        if (!user) {
+          router.push(signupToSave(scholarship.id, `${pathname}${window.location.search}`))
+          return
+        }
         if (!isPending) toggle.mutate({ scholarship, save: !saved })
       }}
       className={cn(layoutClasses[layout], className)}
