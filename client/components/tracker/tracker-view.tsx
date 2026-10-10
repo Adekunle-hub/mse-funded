@@ -8,6 +8,8 @@ import { ResultListSkeleton } from "@/components/scholarship/result-card-skeleto
 import { ReminderList, RemindersPanel } from "@/components/tracker/reminders-panel"
 import { SavedCard } from "@/components/tracker/saved-card"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { SignInPrompt } from "@/components/auth/sign-in-prompt"
+import { useCurrentUser } from "@/hooks/use-auth"
 import { useNow } from "@/hooks/use-now"
 import { useSavedList } from "@/hooks/use-saved"
 import { routes } from "@/lib/routes"
@@ -25,9 +27,20 @@ import { cn } from "@/lib/utils"
 
 export function TrackerView() {
   const now = useNow()
+  const { user, isLoading } = useCurrentUser()
   const saved = useSavedList()
   const [filter, setFilter] = useState<StatusFilter>("all")
   const [sort, setSort] = useState<TrackerSort>("deadline")
+
+  if (!isLoading && !user) {
+    return (
+      <SignInPrompt
+        title="Log in to see your Scholarships"
+        description="Save scholarships to track deadlines, add notes and get reminders. It is free."
+        next={routes.tracker}
+      />
+    )
+  }
 
   if (saved.isError) {
     return (
@@ -52,7 +65,7 @@ export function TrackerView() {
     )
   }
 
-  const entries = saved.data
+  const entries = saved.data ?? []
   if (entries.length === 0) return <EmptySaved />
 
   const open = entries.filter((entry) => !isClosed(entry, now))
@@ -81,7 +94,7 @@ export function TrackerView() {
           <span aria-hidden="true" className="pointer-events-none pl-3.5">
             Sort:
           </span>
-          <span className="sr-only">Sort saved scholarships by</span>
+          <span className="sr-only">Sort Your Scholarships by</span>
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as TrackerSort)}
@@ -97,7 +110,7 @@ export function TrackerView() {
       <div className="mt-4 flex items-start gap-8 sm:mt-6">
         <section aria-labelledby="saved-list-title" className="flex min-w-0 flex-1 flex-col gap-4">
           <h2 id="saved-list-title" className="sr-only">
-            {filter === "all" ? "Saved scholarships" : statusLabels[filter]}
+            {filter === "all" ? "Your Scholarships" : statusLabels[filter]}
           </h2>
           {visible.length === 0 && filter !== "all" && (
             <p className="rounded-card border border-hairline p-6 text-ink-muted">
