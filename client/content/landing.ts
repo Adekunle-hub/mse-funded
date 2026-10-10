@@ -1,23 +1,4 @@
-import type { ScholarshipSummary } from "@/lib/types/scholarship"
-
 export type AccentTone = "mint" | "cream" | "pink"
-
-export const sampleScholarship: ScholarshipSummary = {
-  id: "manchester-polymer-composites-phd",
-  title: "Fully funded PhD in polymer composites",
-  level: "phd",
-  fundingType: "fully-funded",
-  institution: "University of Manchester",
-  funder: "EPSRC Doctoral Training Partnership",
-  country: "United Kingdom",
-  fields: ["Polymers", "Composites"],
-  fundingSummary: "Covers tuition and £19,237 a year for 3.5 years",
-  deadline: "2027-01-14T17:00:00Z",
-  deadlineZone: { id: "Europe/London", label: "UK time" },
-  addedAt: "2026-09-20T09:00:00Z",
-  officialUrl: "https://www.manchester.ac.uk",
-  verification: { status: "verified", checkedAt: "2026-10-02T09:00:00Z" },
-}
 
 export const verificationCallouts = [
   { title: "Checked deadline", description: "With days left, in words" },
@@ -130,7 +111,7 @@ export const faqs = [
   {
     question: "How do you check a listing?",
     answer:
-      "A person opens the funder’s own page, confirms the deadline, funding and eligibility, and records the date. A computer checks every official link daily, and listings that change are marked “Under review”.",
+      "We find funded places on founders’ and universities’ own pages. We read each page and take the deadline, funding and eligibility from it, open the official link before the listing goes live, and show the date we checked. Listings with unclear details are marked “Under review”. Always confirm on the official page before you apply.",
   },
   {
     question: "Which fields do you cover?",
