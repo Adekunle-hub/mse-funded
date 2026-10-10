@@ -1,0 +1,752 @@
+[
+  {
+    "name": "Commonwealth Scholarships",
+    "url": "https://cscuk.fcdo.gov.uk/scholarships/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Chevening Scholarships",
+    "url": "https://www.chevening.org/scholarships/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Erasmus Mundus catalogue",
+    "url": "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en",
+    "kind": "LISTING"
+  },
+  {
+    "name": "DAAD scholarship database",
+    "url": "https://www2.daad.de/deutschland/stipendium/datenbank/en/21148-scholarship-database/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Mastercard Foundation Scholars Program",
+    "url": "https://mastercardfdn.org/en/what-we-do/our-programs/mastercard-foundation-scholars-program/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Commonwealth Master's Scholarships",
+    "url": "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-masters-scholarships/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Commonwealth PhD Scholarships",
+    "url": "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-phd-scholarships/",
+    "kind": "HTML"
+  },
+  {
+    "name": "PTDF Overseas Postgraduate Scholarship",
+    "url": "https://scholarship.ptdf.gov.ng/guidelines",
+    "kind": "HTML"
+  },
+  {
+    "name": "DAAD EPOS development-related courses",
+    "url": "https://www.daad.de/en/information-services-for-higher-education-institutions/further-information-on-daad-programmes/epos/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Stipendium Hungaricum",
+    "url": "https://stipendiumhungaricum.hu/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Eiffel Excellence Scholarship",
+    "url": "https://www.campusfrance.org/en/france-excellence-eiffel-scholarship-program",
+    "kind": "HTML"
+  },
+  {
+    "name": "Swedish Institute Scholarships for Global Professionals",
+    "url": "https://si.se/en/apply/scholarships/swedish-institute-scholarships-for-global-professionals/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Gates Cambridge Scholarship",
+    "url": "https://www.gatescambridge.org/",
+    "kind": "HTML"
+  },
+  {
+    "name": "ETH Excellence Scholarship",
+    "url": "https://ethz.ch/students/en/studies/financial/scholarships/excellencescholarship.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "jobs.ac.uk PhDs: materials",
+    "url": "https://www.jobs.ac.uk/search/?keywords=materials&jobTypeFacet%5B0%5D=phds",
+    "kind": "LISTING"
+  },
+  {
+    "name": "jobs.ac.uk PhDs: metallurgy",
+    "url": "https://www.jobs.ac.uk/search/?keywords=metallurgy&jobTypeFacet%5B0%5D=phds",
+    "kind": "LISTING"
+  },
+  {
+    "name": "jobs.ac.uk PhDs: polymer",
+    "url": "https://www.jobs.ac.uk/search/?keywords=polymer&jobTypeFacet%5B0%5D=phds",
+    "kind": "LISTING"
+  },
+  {
+    "name": "jobs.ac.uk PhDs: ceramics",
+    "url": "https://www.jobs.ac.uk/search/?keywords=ceramics&jobTypeFacet%5B0%5D=phds",
+    "kind": "LISTING"
+  },
+  {
+    "name": "jobs.ac.uk PhDs: composites",
+    "url": "https://www.jobs.ac.uk/search/?keywords=composites&jobTypeFacet%5B0%5D=phds",
+    "kind": "LISTING"
+  },
+  {
+    "name": "jobs.ac.uk PhDs: corrosion",
+    "url": "https://www.jobs.ac.uk/search/?keywords=corrosion&jobTypeFacet%5B0%5D=phds",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Imperial Materials PhD",
+    "url": "https://www.imperial.ac.uk/materials/study/materialsphd/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Northwestern MSE graduate funding",
+    "url": "https://www.mccormick.northwestern.edu/materials-science/academics/graduate/financial-aid.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "Binghamton MSE graduate",
+    "url": "https://www.binghamton.edu/mse/graduate/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Nevada Reno MSE graduate",
+    "url": "https://www.unr.edu/cme/graduate/materials-science",
+    "kind": "HTML"
+  },
+  {
+    "name": "Sapienza Nano job opportunities",
+    "url": "https://nano.web.uniroma1.it/en/job-opportunities",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Kassel nanomaterials open positions",
+    "url": "https://www.uni-kassel.de/fb10/en/institute/chemistry/fields-of-expertise/physical-chemistry-of-nanomaterials/open-positions.html",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Texas A&M MSE Graduate Funding Opportunities",
+    "url": "https://engineering.tamu.edu/materials/admissions-and-aid/scholarships-and-aid/funding-opportunities.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "Auburn MSE Graduate Assistantships",
+    "url": "https://eng.auburn.edu/matl/academics/graduate/assistantships.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "MIT DMSE Graduate Funding Opportunities",
+    "url": "https://dmse.mit.edu/education/graduate-program/funding-opportunities/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Penn State MatSE Why Grad School (Funding)",
+    "url": "https://www.matse.psu.edu/why-matse-grad-school",
+    "kind": "HTML"
+  },
+  {
+    "name": "Penn State EMS Graduate Assistantships, Awards, Scholarships and Fellowships",
+    "url": "https://www.ems.psu.edu/graduate/admissions-and-aid/assistantships-awards-scholarships-and-fellowships",
+    "kind": "HTML"
+  },
+  {
+    "name": "Ohio State MSE Prospective Graduate Students",
+    "url": "https://mse.osu.edu/graduate-degrees-mse-and-we/prospective-graduate-students",
+    "kind": "HTML"
+  },
+  {
+    "name": "Ohio State MSE Exploring Graduate Study (GRA Funding)",
+    "url": "https://mse.osu.edu/graduate-degrees-mse-and-we/exploring",
+    "kind": "HTML"
+  },
+  {
+    "name": "Ohio State MSE Department Openings",
+    "url": "https://www.mse.osu.edu/department-openings",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Ohio State MSE Li Group PhD Openings",
+    "url": "https://u.osu.edu/li.11017/openings/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Colorado School of Mines MME Graduate Program",
+    "url": "https://metallurgy.mines.edu/graduate-program/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Cornell MSE Baker Group Positions",
+    "url": "https://baker.mse.cornell.edu/Positions.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "Cornell MSE Cape Crystal Group Openings",
+    "url": "https://capecrystal.mse.cornell.edu/group/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UC Irvine MSE Lee CEMI Lab Openings",
+    "url": "https://lee-cemi-lab.eng.uci.edu/openings/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Duke Materials Initiative PhD Funding",
+    "url": "https://dmi.duke.edu/education/phd",
+    "kind": "HTML"
+  },
+  {
+    "name": "Purdue MSE Graduate Program",
+    "url": "https://engineering.purdue.edu/MSE/academics/graduate",
+    "kind": "HTML"
+  },
+  {
+    "name": "NC State MSE Graduate Financial Support",
+    "url": "https://mse.ncsu.edu/graduate/financial-support/",
+    "kind": "HTML"
+  },
+  {
+    "name": "NC State MSE Prospective Graduate Students",
+    "url": "https://mse.ncsu.edu/graduate/prospective-students/",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Florida MSE Graduate Program",
+    "url": "https://mse.ufl.edu/academics/graduate/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Drexel MSE Doctoral Program",
+    "url": "https://drexel.edu/engineering/academics/graduate-programs/doctoral/materials-science-engineering/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UT Austin MSE (TMI) Prospective Students",
+    "url": "https://tmi.utexas.edu/academics/prospective-students/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UT Austin MSE (TMI) Graduate Program",
+    "url": "https://www.tmi.utexas.edu/academics/graduate-program",
+    "kind": "HTML"
+  },
+  {
+    "name": "Iowa State MSE Graduate Programs",
+    "url": "https://www.mse.iastate.edu/graduate-programs/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Clemson MSE Graduate Program",
+    "url": "https://www.clemson.edu/cecas/departments/mse/academics/graduate/index.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "Clemson MSE Graduate Applicant FAQ (Assistantships)",
+    "url": "https://www.clemson.edu/cecas/departments/mse/academics/graduate/faq.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "Tennessee MSE Future Graduate Students",
+    "url": "https://tickle.utk.edu/mse/future-students/grad/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UCF MSE Graduate Program",
+    "url": "https://mse.ucf.edu/graduate-program/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UNT MSE Graduate Program",
+    "url": "https://engineering.unt.edu/mse/graduate/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UIUC MatSE PhD Admissions and Funding",
+    "url": "https://matse.illinois.edu/admissions/graduate/phd",
+    "kind": "HTML"
+  },
+  {
+    "name": "Arizona State DaMS Lab Funded PhD Position",
+    "url": "https://labs.engineering.asu.edu/dams/new-position",
+    "kind": "HTML"
+  },
+  {
+    "name": "Arizona State Kang Group Open Positions",
+    "url": "https://faculty.engineering.asu.edu/kang/open-positions",
+    "kind": "HTML"
+  },
+  {
+    "name": "UC San Diego MSE Semnani Group Join Us",
+    "url": "https://semnani.ucsd.edu/join-us",
+    "kind": "HTML"
+  },
+  {
+    "name": "UT Dallas MSE McCall Lab Prospective Students",
+    "url": "https://labs.utdallas.edu/mccall/contact/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UCSB Materials Graduate Program Admissions",
+    "url": "https://materials.ucsb.edu/academics/graduate-program-admissions",
+    "kind": "HTML"
+  },
+  {
+    "name": "Stanford MSE Graduate FAQ (Funding)",
+    "url": "https://mse.stanford.edu/academics-admissions/frequently-asked-questions",
+    "kind": "HTML"
+  },
+  {
+    "name": "UC Berkeley MSE Graduate Admissions and Financial Support",
+    "url": "https://mse.berkeley.edu/graduate-admissions/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Missouri S&T MSE PhD Program",
+    "url": "https://mse.mst.edu/academic-programs/phdinmse/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Utah MSE Graduate Admissions",
+    "url": "https://mse.utah.edu/admissions/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Lehigh MSE PhD Program",
+    "url": "https://engineering.lehigh.edu/mse/graduate/phd",
+    "kind": "HTML"
+  },
+  {
+    "name": "Lehigh MSE Graduate Programs",
+    "url": "https://engineering.lehigh.edu/mse/graduate",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Washington MSE PhD Admission",
+    "url": "https://mse.washington.edu/admission/phd",
+    "kind": "HTML"
+  },
+  {
+    "name": "Carnegie Mellon MSE Graduate Education",
+    "url": "https://mse.engineering.cmu.edu/education/graduate/index.html",
+    "kind": "HTML"
+  },
+  {
+    "name": "Boise State MSE Graduate Studies",
+    "url": "https://www.boisestate.edu/coen-materials/students/graduate-studies/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Boise State MSE Graduate Funding",
+    "url": "https://www.boisestate.edu/coen-materials/students/graduate-studies/funding/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Arizona MSE Graduate Funding",
+    "url": "https://mse.engineering.arizona.edu/grad-programs/funding",
+    "kind": "HTML"
+  },
+  {
+    "name": "Oregon State Materials Science Graduate Program",
+    "url": "https://engineering.oregonstate.edu/academics/programs/materials-science/graduate",
+    "kind": "HTML"
+  },
+  {
+    "name": "Oregon State MIME Graduate Programs (Materials Science)",
+    "url": "https://engineering.oregonstate.edu/MIME/mymime/mime-graduate-programs",
+    "kind": "HTML"
+  },
+  {
+    "name": "Alabama Metallurgical and Materials Engineering Department",
+    "url": "https://mte.eng.ua.edu/",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Manchester Department of Materials postgraduate research",
+    "url": "https://www.materials.manchester.ac.uk/study/postgraduate-research/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Manchester PhD in Materials (degrees and projects)",
+    "url": "https://www.se.manchester.ac.uk/study/postgraduate-research/degrees-and-projects/materials-science/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Manchester EPSRC CDT 2D Materials of Tomorrow programme",
+    "url": "https://www.manchester.ac.uk/study/postgraduate-research/programmes/list/21637/phd-2d-materials-of-tomorrow-cdt/",
+    "kind": "HTML"
+  },
+  {
+    "name": "EPSRC CDT 2D Materials of Tomorrow (Manchester/Cambridge) how to apply",
+    "url": "https://www.2d-materials-cdt.manchester.ac.uk/apply/",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Cambridge Materials Science and Metallurgy PhD funding",
+    "url": "https://www.msm.cam.ac.uk/pg-study/phd-materials-science/phd-funding",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Cambridge Materials Science and Metallurgy job and studentship vacancies",
+    "url": "https://www.cam.ac.uk/taxonomy/jobs-units/department-of-materials-science-and-metallurgy",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Oxford Materials IMAT CDT studentships",
+    "url": "https://www.materials.ox.ac.uk/node/3749281",
+    "kind": "HTML"
+  },
+  {
+    "name": "Oxford EPSRC CDT Inorganic Materials for Advanced Manufacturing (IMAT) how to apply",
+    "url": "https://imatcdt.chem.ox.ac.uk/apply/how_to_apply/",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Birmingham Metallurgy and Materials PhD funding",
+    "url": "https://www.birmingham.ac.uk/study/postgraduate/subjects/materials-science-and-engineering-courses/metallurgy-materials-phd",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Leeds Chemical and Process Engineering PhD opportunities",
+    "url": "https://phd.leeds.ac.uk/research-area/165-chemical-and-process-engineering",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Leeds School of Chemical and Process Engineering research degrees",
+    "url": "https://eps.leeds.ac.uk/chemical-engineering-research-degrees",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Leeds EPSRC CDT UK Semiconductor Industry Future Skills studentships",
+    "url": "https://phd.leeds.ac.uk/funding/450-epsrc-centre-for-doctoral-training-in-uk-semiconductor-industry-future-skills",
+    "kind": "HTML"
+  },
+  {
+    "name": "Loughborough University Materials research degrees",
+    "url": "https://www.lboro.ac.uk/departments/materials/research-degrees/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Loughborough Additive Manufacturing Research Group PhD positions",
+    "url": "https://www.lboro.ac.uk/research/amrg/opportunities/phdpositions/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Swansea University Materials Science and Engineering postgraduate research",
+    "url": "https://www.swansea.ac.uk/postgraduate/research/engineering-applied-sciences/materials/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Swansea University funded research scholarships",
+    "url": "https://www.swansea.ac.uk/postgraduate/scholarships/research/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Swansea University UK SIFS EPSRC CDT studentships",
+    "url": "https://www.swansea.ac.uk/research/research-with-us/postgraduate-research/doctoral-training-programmes/uk-sifs/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Nottingham Engineering postgraduate research funded studentships",
+    "url": "https://www.nottingham.ac.uk/Engineering/PG-Research/PG-Research.aspx",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Liverpool CDT Digital and Automated Materials Chemistry studentships",
+    "url": "https://www.liverpool.ac.uk/doctoral-training/digital-and-automated-materials-chemistry/prospective-students/",
+    "kind": "HTML"
+  },
+  {
+    "name": "QMUL School of Engineering and Materials Science funded studentships",
+    "url": "https://www.sems.qmul.ac.uk/research/studentships/list.php?show=Y",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Bristol Science and Engineering postgraduate research scholarships",
+    "url": "https://www.bristol.ac.uk/science-engineering/postgraduate-research/pgr-scholarships/",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Bristol Composites Institute student opportunities",
+    "url": "https://www.bristol.ac.uk/composites/opportunities/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Southampton PhD projects",
+    "url": "https://www.southampton.ac.uk/study/postgraduate-research/projects",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Surrey funded studentships",
+    "url": "https://www.surrey.ac.uk/fees-and-funding/studentships",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Warwick WMG Engineering MPhil/PhD funded projects",
+    "url": "https://warwick.ac.uk/study/postgraduate/courses/mphil-phd-engineering-wmg/",
+    "kind": "HTML"
+  },
+  {
+    "name": "University of Exeter Metamaterials CDT PhD opportunities",
+    "url": "https://www.exeter.ac.uk/research/metamaterials/doctoral/opportunities/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Exeter funding and studentships search",
+    "url": "https://www.exeter.ac.uk/study/funding/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Bath EPSRC CDT Sustainable Chemical Technologies studentships",
+    "url": "https://www.csct.ac.uk/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Cranfield University PhD research opportunities",
+    "url": "https://www.cranfield.ac.uk/research/phd",
+    "kind": "LISTING"
+  },
+  {
+    "name": "AcademicTransfer materials science PhD vacancies (NL)",
+    "url": "https://www.academictransfer.com/en/jobs/?q=materials+science&vacancy_type=phd",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Eindhoven University of Technology vacancy overview",
+    "url": "https://www.tue.nl/en/working-at-tue/vacancy-overview",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Groningen Zernike Institute for Advanced Materials vacancies",
+    "url": "https://www.rug.nl/research/zernike/vacancies/?lang=en",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Groningen all vacancies",
+    "url": "https://werkenbij.rug.nl/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Twente vacancies",
+    "url": "https://utwentecareers.nl/en/vacancies/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "ETH Zurich job openings (incl. Department of Materials doctoral positions)",
+    "url": "https://jobs.ethz.ch/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "KU Leuven jobsite (PhD vacancies)",
+    "url": "https://www.kuleuven.be/personeel/jobsite/en",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Aalto University open positions (doctoral researchers)",
+    "url": "https://www.aalto.fi/en/open-positions",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Max Planck Institute for Sustainable Materials PhD and career",
+    "url": "https://www.mpie.de/2747317/career",
+    "kind": "HTML"
+  },
+  {
+    "name": "Max Planck Institute for Solid State Research Stuttgart job offers",
+    "url": "https://www.fkf.mpg.de/jobs",
+    "kind": "LISTING"
+  },
+  {
+    "name": "IMDEA Materials Institute job offers",
+    "url": "https://jobs.materials.imdea.org/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Helmholtz-Zentrum Hereon careers and PhD",
+    "url": "https://www.hereon.de/career/index.php.en",
+    "kind": "HTML"
+  },
+  {
+    "name": "KIT Institute for Applied Materials (IAM-ZM) job offers",
+    "url": "https://www.iam.kit.edu/zm/Stellenangebote.php",
+    "kind": "LISTING"
+  },
+  {
+    "name": "TU Munich scientific staff and doctoral candidate vacancies",
+    "url": "https://portal.mytum.de/jobs/wissenschaftler/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Fraunhofer IMWS vacancies",
+    "url": "https://www.imws.fraunhofer.de/en/schnelleinstieg-fuer-bewerber/jobs-am-imws.html",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Politecnico di Milano PhD programmes and calls",
+    "url": "https://www.polimi.it/dottorato",
+    "kind": "HTML"
+  },
+  {
+    "name": "MEXT Japanese Government Scholarship (Study in Japan)",
+    "url": "https://www.studyinjapan.go.jp/en/planning/scholarships/mext-scholarships/",
+    "kind": "HTML"
+  },
+  {
+    "name": "MEXT Japanese Government Scholarship (mext.go.jp)",
+    "url": "https://www.mext.go.jp/en/policy/education/highered/title02/detail02/sdetail02/1373897.htm",
+    "kind": "HTML"
+  },
+  {
+    "name": "Study in Japan scholarships index",
+    "url": "https://www.studyinjapan.go.jp/en/planning/scholarships/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "OWSD PhD Fellowships",
+    "url": "https://owsd.net/phd-fellowships",
+    "kind": "HTML"
+  },
+  {
+    "name": "TWAS fellowships index",
+    "url": "https://twas.org/opportunities/fellowships",
+    "kind": "LISTING"
+  },
+  {
+    "name": "ANSO-CAS-TWAS/UNESCO PhD Scholarship",
+    "url": "https://twas.org/opportunity/anso-cas-twasunesco-phd-scholarship",
+    "kind": "HTML"
+  },
+  {
+    "name": "Global Korea Scholarship (GKS)",
+    "url": "https://www.studyinkorea.go.kr/en/plan/scholarship.do",
+    "kind": "HTML"
+  },
+  {
+    "name": "Türkiye Burslari graduate programmes",
+    "url": "https://www.turkiyeburslari.gov.tr/en/page/prospective-students/graduate-programs",
+    "kind": "HTML"
+  },
+  {
+    "name": "KAUST Fellowship fees and funding",
+    "url": "https://admissions.kaust.edu.sa/fees-funding",
+    "kind": "HTML"
+  },
+  {
+    "name": "Pan African University admissions and scholarships",
+    "url": "https://pau-au.africa/admissions",
+    "kind": "HTML"
+  },
+  {
+    "name": "AfDB Japan Africa Dream Scholarship (JADS)",
+    "url": "https://www.afdb.org/en/about-us/careers/japan-africa-dream-scholarship-jads-program",
+    "kind": "HTML"
+  },
+  {
+    "name": "Joint Japan/World Bank Graduate Scholarship (JJ/WBGSP)",
+    "url": "https://www.worldbank.org/en/programs/scholarships/jj-wbgsp",
+    "kind": "HTML"
+  },
+  {
+    "name": "World Bank scholarships index",
+    "url": "https://www.worldbank.org/en/programs/scholarships",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Islamic Development Bank scholarships",
+    "url": "https://www.isdb.org/scholarships",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Rhodes Scholarship for West Africa",
+    "url": "https://www.rhodeshouse.ox.ac.uk/scholarships/applications/west-africa/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Commonwealth Shared Scholarships",
+    "url": "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-shared-scholarships-applications/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Commonwealth PhD Scholarships for least developed countries and vulnerable states",
+    "url": "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-phd-scholarships-for-least-developed-countries-and-vulnerable-states/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Australia Awards Africa",
+    "url": "https://australiaawardsafrica.org/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Chevening Scholarships Nigeria",
+    "url": "https://www.chevening.org/scholarship/nigeria/",
+    "kind": "HTML"
+  },
+  {
+    "name": "Cambridge Trust scholarship finder",
+    "url": "https://www.cambridgetrust.org/find-a-scholarship/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "University of Edinburgh Mastercard Foundation Scholars",
+    "url": "https://registryservices.ed.ac.uk/student-funding/postgraduate/the-mastercard-foundation-scholars",
+    "kind": "HTML"
+  },
+  {
+    "name": "McGill University Mastercard Foundation Scholars",
+    "url": "https://www.mcgill.ca/mastercardfdn-scholars/",
+    "kind": "HTML"
+  },
+  {
+    "name": "UC Berkeley Mastercard Foundation Scholars partner universities",
+    "url": "https://mcfscholarsprogram.berkeley.edu/partner-universities",
+    "kind": "LISTING"
+  },
+  {
+    "name": "Fulbright Foreign Student Program",
+    "url": "https://foreign.fulbrightonline.org/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "ICTP/IAEA Sandwich Training Educational Programme (STEP)",
+    "url": "https://www.ictp.it/opportunity/ictpiaea-sandwich-training-education-programme",
+    "kind": "HTML"
+  },
+  {
+    "name": "DAAD scholarships overview",
+    "url": "https://www.daad.de/en/studying-in-germany/scholarships/daad-scholarships/",
+    "kind": "LISTING"
+  },
+  {
+    "name": "MaMaSELF+ Erasmus Mundus Master in Materials Science",
+    "url": "https://www.mamaself.eu/",
+    "kind": "HTML"
+  },
+  {
+    "name": "AMASE Erasmus Mundus Master (EUSMAT, Saarland)",
+    "url": "https://www.eusmat.net/international-studies/master/amase/",
+    "kind": "HTML"
+  },
+  {
+    "name": "AMASE Erasmus Mundus Master (UPC Barcelona EEBE)",
+    "url": "https://eebe.upc.edu/en/degrees/masters-degree/amase",
+    "kind": "HTML"
+  },
+  {
+    "name": "AMASE Erasmus Mundus Master (Université de Lorraine EEIGM)",
+    "url": "https://eeigm.univ-lorraine.fr/en/master-erasmus-mundus-amase/",
+    "kind": "HTML"
+  },
+  {
+    "name": "FAME Master in Materials Science (TU Darmstadt)",
+    "url": "https://www.mawi.tu-darmstadt.de/studium/vor_dem_studium/master_overview/fame_master_programme/index.en.jsp",
+    "kind": "HTML"
+  },
+  {
+    "name": "i-MESC Erasmus Mundus Master in Materials for Energy Storage and Conversion",
+    "url": "https://i-mesc.eu/",
+    "kind": "HTML"
+  }
+]
