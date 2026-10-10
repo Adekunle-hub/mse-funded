@@ -1,7 +1,5 @@
 import type { DeadlineZone, ScholarshipDetail } from "../types/scholarship.js"
 
-// Seed listings for the in-memory store. Replace with a database.
-// Content mirrors the design mockups; it is not verified data.
 
 const UK: DeadlineZone = { id: "Europe/London", label: "UK time" }
 const CET: DeadlineZone = { id: "Europe/Berlin", label: "CET" }
