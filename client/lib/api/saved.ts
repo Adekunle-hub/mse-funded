@@ -1,42 +1,30 @@
 import { apiFetch } from "@/lib/api/client"
-import { apiConfig } from "@/lib/api/config"
-import { mockSavedStore } from "@/lib/data/mock-saved-store"
-import type { ScholarshipSummary } from "@/lib/types/scholarship"
 import type { SavedScholarship, SavedScholarshipUpdate } from "@/lib/types/saved"
 
-const withSession = { credentials: "include" } as const
-const json = (body: unknown) => ({
-  ...withSession,
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(body),
-})
+const savedPath = (id: string) => `/me/saved/${encodeURIComponent(id)}`
 
 export const savedApi = {
-  list(): Promise<SavedScholarship[]> {
-    if (apiConfig.useMock) return Promise.resolve(mockSavedStore.list())
-    return apiFetch("/me/saved", withSession)
+  list() {
+    return apiFetch<SavedScholarship[]>("/me/saved")
   },
 
-  save(scholarship: ScholarshipSummary): Promise<SavedScholarship> {
-    if (apiConfig.useMock) return Promise.resolve(mockSavedStore.save(scholarship))
-    return apiFetch(`/me/saved/${encodeURIComponent(scholarship.id)}`, { method: "PUT", ...withSession })
+  save(id: string) {
+    return apiFetch<SavedScholarship>(savedPath(id), { method: "PUT" })
   },
 
-  update(id: string, changes: SavedScholarshipUpdate): Promise<SavedScholarship> {
-    if (apiConfig.useMock) return Promise.resolve(mockSavedStore.update(id, changes))
-    return apiFetch(`/me/saved/${encodeURIComponent(id)}`, { method: "PATCH", ...json(changes) })
+  update(id: string, changes: SavedScholarshipUpdate) {
+    return apiFetch<SavedScholarship>(savedPath(id), { method: "PATCH", body: JSON.stringify(changes) })
   },
 
-  remove(id: string): Promise<void> {
-    if (apiConfig.useMock) return Promise.resolve(mockSavedStore.remove(id))
-    return apiFetch(`/me/saved/${encodeURIComponent(id)}`, { method: "DELETE", ...withSession })
+  remove(id: string) {
+    return apiFetch<void>(savedPath(id), { method: "DELETE" })
   },
 
-  restore(entry: SavedScholarship): Promise<void> {
-    if (apiConfig.useMock) return Promise.resolve(mockSavedStore.restore(entry))
-    return apiFetch(`/me/saved/${encodeURIComponent(entry.scholarship.id)}`, {
+  restore(entry: SavedScholarship) {
+    const { status, note, remindersOn } = entry
+    return apiFetch<SavedScholarship>(savedPath(entry.scholarship.id), {
       method: "PUT",
-      ...json({ status: entry.status, note: entry.note, remindersOn: entry.remindersOn }),
+      body: JSON.stringify({ status, note, remindersOn }),
     })
   },
 }
