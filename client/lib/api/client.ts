@@ -1,6 +1,4 @@
-import { apiConfig } from "@/lib/api/config"
-
-const API_BASE_URL = apiConfig.baseUrl
+import { apiBaseUrl } from "@/lib/api/config"
 
 type QueryValue = string | number | boolean | undefined | null
 export type QueryParams = Record<string, QueryValue | QueryValue[]>
@@ -17,7 +15,7 @@ export class ApiError extends Error {
 }
 
 function buildUrl(path: string, query?: QueryParams) {
-  const url = new URL(path.replace(/^\//, ""), API_BASE_URL.endsWith("/") ? API_BASE_URL : `${API_BASE_URL}/`)
+  const url = new URL(path.replace(/^\//, ""), apiBaseUrl.endsWith("/") ? apiBaseUrl : `${apiBaseUrl}/`)
   for (const [key, raw] of Object.entries(query ?? {})) {
     const values = Array.isArray(raw) ? raw : [raw]
     for (const value of values) {
@@ -34,22 +32,47 @@ async function readBody(response: Response) {
   return contentType.includes("application/json") ? response.json() : response.text()
 }
 
+const pathsWithoutRefresh = [
+  "/auth/login",
+  "/auth/signup",
+  "/auth/refresh",
+  "/auth/logout",
+  "/auth/forgot-password",
+  "/auth/reset-password",
+]
+let refreshing: Promise<boolean> | null = null
+
+function refreshSession(): Promise<boolean> {
+  refreshing ??= fetch(buildUrl("/auth/refresh"), { method: "POST", credentials: "include" })
+    .then((response) => response.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshing = null
+    })
+  return refreshing
+}
+
 export async function apiFetch<T>(
   path: string,
   { query, headers, ...init }: RequestInit & { query?: QueryParams } = {}
 ): Promise<T> {
-  const response = await fetch(buildUrl(path, query), {
-    ...init,
-    headers: { Accept: "application/json", ...headers },
-  })
+  const send = () =>
+    fetch(buildUrl(path, query), {
+      credentials: "include",
+      ...init,
+      headers: { Accept: "application/json", ...(init.body ? { "Content-Type": "application/json" } : {}), ...headers },
+    })
+
+  let response = await send()
+  if (response.status === 401 && !pathsWithoutRefresh.includes(path) && (await refreshSession())) {
+    response = await send()
+  }
 
   const body = await readBody(response)
 
   if (!response.ok) {
-    const message =
-      typeof body === "object" && body !== null && "message" in body
-        ? String((body as { message: unknown }).message)
-        : response.statusText
+    const raw = typeof body === "object" && body !== null && "message" in body ? (body as { message: unknown }).message : null
+    const message = Array.isArray(raw) ? raw.join(". ") : raw ? String(raw) : response.statusText
     throw new ApiError(response.status, message, body)
   }
 
