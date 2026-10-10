@@ -1,6 +1,6 @@
 "use client"
 
-import { MessageCircle } from "lucide-react"
+import { Mail } from "lucide-react"
 import { useId } from "react"
 
 import { useSavedEntry, useUpdateSaved } from "@/hooks/use-saved"
@@ -16,9 +16,9 @@ export function ReminderToggle({ scholarshipId }: { scholarshipId: string }) {
 
   return (
     <div className="flex items-center gap-3">
-      <MessageCircle aria-hidden="true" className="size-5 shrink-0" />
+      <Mail aria-hidden="true" className="size-5 shrink-0" />
       <span id={labelId} className="flex-1 type-body-sm">
-        WhatsApp reminders 14, 7 and 1 day before
+        Email reminders 7, 3 and 1 day before
       </span>
       <button
         type="button"
