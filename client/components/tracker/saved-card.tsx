@@ -81,14 +81,18 @@ export function SavedCard({ entry, now }: SavedCardProps) {
               <Check aria-hidden="true" className="size-4 text-teal" />
               Submitted {entry.submittedAt ? formatDate(entry.submittedAt, { withYear: false }) : ""}
             </span>
-            <span className="type-body-sm text-ink-muted">Deadline {formatDate(scholarship.deadline)}</span>
+            {scholarship.deadline && (
+              <span className="type-body-sm text-ink-muted">Deadline {formatDate(scholarship.deadline)}</span>
+            )}
           </>
         ) : (
           <>
             <DeadlineBadge deadline={scholarship.deadline} now={now} />
-            <span className="type-body-sm text-ink-muted">
-              Closes {formatDeadlineMoment(scholarship.deadline, scholarship.deadlineZone, { short: true })}
-            </span>
+            {scholarship.deadline && (
+              <span className="type-body-sm text-ink-muted">
+                Closes {formatDeadlineMoment(scholarship.deadline, scholarship.deadlineZone, { short: true })}
+              </span>
+            )}
           </>
         )}
       </div>
