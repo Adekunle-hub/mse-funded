@@ -1,18 +1,18 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, Res } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 
-import { SessionService } from '../session/session.service.js';
+import { CreateReportDto } from './dto/create-report.dto.js';
 import { ReportsService } from './reports.service.js';
 import { ScholarshipsService } from './scholarships.service.js';
 
 type QueryInput = Record<string, string | string[] | undefined>;
 
+@SkipThrottle()
 @Controller('scholarships')
 export class ScholarshipsController {
   constructor(
     private readonly scholarships: ScholarshipsService,
     private readonly reports: ReportsService,
-    private readonly sessions: SessionService,
   ) {}
 
   @Get()
@@ -40,17 +40,13 @@ export class ScholarshipsController {
     return this.scholarships.similar(id);
   }
 
+  @SkipThrottle({ default: false })
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post(':id/reports')
   @HttpCode(201)
-  report(
-    @Param('id') id: string,
-    @Body() body: unknown,
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    this.scholarships.findOne(id);
-    const sessionId = this.sessions.ensure(request, response);
-    const { id: reportId, createdAt } = this.reports.create(id, this.sessions.ownerKey(sessionId), body);
+  async report(@Param('id') id: string, @Body() dto: CreateReportDto) {
+    await this.scholarships.findOne(id);
+    const { id: reportId, createdAt } = this.reports.create(id, dto);
     return { id: reportId, createdAt };
   }
 }
