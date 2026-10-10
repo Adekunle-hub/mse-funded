@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 
 import { MotionProvider } from "@/components/motion/motion-provider"
+import { AppProviders } from "@/components/providers/app-providers"
 import { fontVariables } from "@/lib/fonts"
 import { siteConfig } from "@/lib/site-config"
 import "./globals.css"
@@ -47,7 +48,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
-        <MotionProvider>{children}</MotionProvider>
+        <MotionProvider>
+          <AppProviders>{children}</AppProviders>
+        </MotionProvider>
       </body>
     </html>
   )
