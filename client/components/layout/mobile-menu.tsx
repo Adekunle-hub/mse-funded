@@ -6,10 +6,12 @@ import { motion, type Variants } from "motion/react"
 import { useRef, useState, type MouseEvent } from "react"
 import { ArrowUpRight, X } from "lucide-react"
 
+import { UserAvatar } from "@/components/auth/user-avatar"
 import { Wordmark } from "@/components/brand/wordmark"
 import { LatticeField } from "@/components/landing/lattice-field"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { useCurrentUser, useLogout } from "@/hooks/use-auth"
 import { mainNav, routes } from "@/lib/routes"
 import { cn } from "@/lib/utils"
 
@@ -53,8 +55,9 @@ export function MobileMenu() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const pendingHref = useRef<string | null>(null)
+  const { user } = useCurrentUser()
+  const logout = useLogout()
 
-  // Navigate only after the sheet has closed, so scroll-lock restoration can't undo the jump.
   const navigateAfterClose = (event: MouseEvent<HTMLAnchorElement>) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     event.preventDefault()
@@ -136,28 +139,60 @@ export function MobileMenu() {
           <motion.div variants={footer} className="flex flex-col gap-3 border-t border-hairline bg-surface/90 p-4">
             <p className="flex items-center gap-2 type-label font-normal text-ink-muted">
               <span aria-hidden="true" className="live-dot size-2 rounded-[2px] bg-teal" />
-              Every link checked by a person. Free for students.
+              Every listing from an official page. Free for students.
             </p>
-            <div className="grid grid-cols-2 gap-3">
-              <motion.div whileTap={{ scale: 0.96 }}>
-                <Link
-                  href={routes.login}
-                  onClick={navigateAfterClose}
-                  className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full bg-surface")}
-                >
-                  Log in
-                </Link>
-              </motion.div>
-              <motion.div whileTap={{ scale: 0.96 }}>
-                <Link
-                  href={routes.signup}
-                  onClick={navigateAfterClose}
-                  className={cn(buttonVariants({ variant: "primary", size: "lg" }), "w-full")}
-                >
-                  Sign up
-                </Link>
-              </motion.div>
-            </div>
+            {user ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <UserAvatar name={user.name} size={40} />
+                  <div className="min-w-0">
+                    <p className="truncate type-label text-ink">{user.name}</p>
+                    <p className="truncate type-body-sm text-ink-muted">{user.email}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    href={routes.tracker}
+                    onClick={navigateAfterClose}
+                    className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full bg-surface")}
+                  >
+                    Saved
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full bg-surface"
+                    onClick={() => {
+                      setOpen(false)
+                      logout.mutate()
+                    }}
+                  >
+                    Log out
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <motion.div whileTap={{ scale: 0.96 }}>
+                  <Link
+                    href={routes.login}
+                    onClick={navigateAfterClose}
+                    className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full bg-surface")}
+                  >
+                    Log in
+                  </Link>
+                </motion.div>
+                <motion.div whileTap={{ scale: 0.96 }}>
+                  <Link
+                    href={routes.signup}
+                    onClick={navigateAfterClose}
+                    className={cn(buttonVariants({ variant: "primary", size: "lg" }), "w-full")}
+                  >
+                    Sign up
+                  </Link>
+                </motion.div>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       </SheetContent>
