@@ -1,4 +1,3 @@
-import { scholarshipSeed } from "./scholarship-seed.js"
 import { calendarDaysBetween } from "../format/date.js"
 import {
   deadlineLabel,
@@ -21,12 +20,17 @@ type FilterKey = MultiFilterKey | "deadline" | "q"
 
 export const toSummary = toSummaryFromDetail
 
+function deadlineTime(item: ScholarshipSummary) {
+  return item.deadline ? new Date(item.deadline).getTime() : Number.POSITIVE_INFINITY
+}
+
 function isOpen(item: ScholarshipSummary, now: Date) {
-  return new Date(item.deadline).getTime() >= now.getTime()
+  return deadlineTime(item) >= now.getTime()
 }
 
 function matchesWindow(item: ScholarshipSummary, window: SearchFilters["deadline"], now: Date) {
   if (window === "any") return true
+  if (!item.deadline) return false
   const days = calendarDaysBetween(now, new Date(item.deadline))
   if (window === "30d") return days <= 30
   if (window === "1-3m") return days > 30 && days <= 92
@@ -98,7 +102,7 @@ function sortItems(items: ScholarshipSummary[], sort: SearchFilters["sort"]) {
   return [...items].sort((a, b) => {
     if (sort === "verified") return time(b.verification.checkedAt) - time(a.verification.checkedAt)
     if (sort === "newest") return time(b.addedAt) - time(a.addedAt)
-    return time(a.deadline) - time(b.deadline) || flaggedLast(a, b)
+    return deadlineTime(a) - deadlineTime(b) || flaggedLast(a, b)
   })
 }
 
@@ -122,16 +126,21 @@ function suggestionsFor(pool: ScholarshipSummary[], filters: SearchFilters, now:
   return suggestions.sort((a, b) => b.count - a.count).slice(0, 3)
 }
 
-export function searchListings(filters: SearchFilters, now: Date): SearchResult {
-  const pool = scholarshipSeed.map(toSummary)
+export function searchListings(listings: ScholarshipDetail[], filters: SearchFilters, now: Date): SearchResult {
+  const pool = listings.map(toSummary)
   const matched = sortItems(
     pool.filter((item) => matches(item, filters, now)),
     filters.sort
   )
 
+  const pageCount = Math.max(1, Math.ceil(matched.length / SEARCH_PAGE_SIZE))
+  const page = Math.min(filters.page, pageCount)
+
   return {
-    items: matched.slice(0, filters.page * SEARCH_PAGE_SIZE),
+    items: matched.slice((page - 1) * SEARCH_PAGE_SIZE, page * SEARCH_PAGE_SIZE),
     total: matched.length,
+    page,
+    pageCount,
     pageSize: SEARCH_PAGE_SIZE,
     facets: {
       level: facetFor("level", pool, filters, now),
@@ -143,24 +152,28 @@ export function searchListings(filters: SearchFilters, now: Date): SearchResult 
   }
 }
 
-export function countListings(filters: SearchFilters, now: Date) {
-  return scholarshipSeed.map(toSummary).filter((item) => matches(item, filters, now)).length
+export function openListings(listings: ScholarshipDetail[], now: Date) {
+  return sortItems(listings.map(toSummary).filter((item) => isOpen(item, now)), "deadline")
 }
 
-export function findListing(id: string) {
-  return scholarshipSeed.find((item) => item.id === id) ?? null
+export function countListings(listings: ScholarshipDetail[], filters: SearchFilters, now: Date) {
+  return listings.map(toSummary).filter((item) => matches(item, filters, now)).length
 }
 
-export function similarListings(id: string, now: Date, limit = 3) {
-  const current = findListing(id)
+export function findListing(listings: ScholarshipDetail[], id: string) {
+  return listings.find((item) => item.id === id) ?? null
+}
+
+export function similarListings(listings: ScholarshipDetail[], id: string, now: Date, limit = 3) {
+  const current = findListing(listings, id)
   if (!current) return []
   const score = (item: ScholarshipDetail) =>
     item.fields.filter((field) => current.fields.includes(field)).length * 2 +
     Number(item.level === current.level)
 
-  return scholarshipSeed
+  return listings
     .filter((item) => item.id !== id && isOpen(item, now) && score(item) > 0)
-    .sort((a, b) => score(b) - score(a) || new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+    .sort((a, b) => score(b) - score(a) || deadlineTime(a) - deadlineTime(b))
     .slice(0, limit)
     .map(toSummary)
 }
