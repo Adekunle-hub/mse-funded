@@ -1,6 +1,7 @@
 import Link from "next/link"
-import type { ReactNode } from "react"
+import { Suspense, type ReactNode } from "react"
 
+import { AuthSwitchLink } from "@/components/auth/auth-switch-link"
 import { Wordmark } from "@/components/brand/wordmark"
 
 type AuthShellProps = {
@@ -14,10 +15,15 @@ type AuthShellProps = {
 }
 
 export function AuthShell({ title, subtitle, switchPrompt, switchLabel, switchHref, children, footer }: AuthShellProps) {
-  const switchLink = (
+  const plainLink = (
     <Link href={switchHref} className="font-medium text-teal underline-offset-4 hover:underline">
       {switchLabel}
     </Link>
+  )
+  const switchLink = (
+    <Suspense fallback={plainLink}>
+      <AuthSwitchLink href={switchHref} label={switchLabel} />
+    </Suspense>
   )
 
   return (
