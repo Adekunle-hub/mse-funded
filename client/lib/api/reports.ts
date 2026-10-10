@@ -1,5 +1,4 @@
 import { apiFetch } from "@/lib/api/client"
-import { apiConfig } from "@/lib/api/config"
 
 export const reportReasons = [
   { value: "broken-link", label: "The official link is broken" },
@@ -17,14 +16,8 @@ export type ListingReport = {
 }
 
 export async function submitListingReport(scholarshipId: string, report: ListingReport) {
-  if (apiConfig.useMock) {
-    await new Promise((resolve) => setTimeout(resolve, 600))
-    return
-  }
   await apiFetch(`/scholarships/${encodeURIComponent(scholarshipId)}/reports`, {
     method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(report),
   })
 }
