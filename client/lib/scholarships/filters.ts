@@ -2,7 +2,7 @@ import { fundingTypeLabels, studyLevelLabels } from "@/lib/scholarships/labels"
 import type { FundingType, StudyLevel } from "@/lib/types/scholarship"
 import type { DeadlineWindow, MultiFilterKey, SearchFilters, SortOption } from "@/lib/types/search"
 
-export const SEARCH_PAGE_SIZE = 20
+export const SEARCH_PAGE_SIZE = 10
 
 export const fieldOptions = ["Polymers", "Ceramics", "Metals", "Nanomaterials", "Composites", "Corrosion"]
 
@@ -69,7 +69,7 @@ export function parseSearchFilters(source: ParamSource): SearchFilters {
     ),
     deadline: oneOf(readOne(source, "deadline"), deadlineOptions.map((o) => o.value), "any"),
     sort: oneOf(readOne(source, "sort"), sortOptions.map((o) => o.value), "deadline"),
-    page: Number.isFinite(page) && page > 0 ? Math.min(page, 50) : 1,
+    page: Number.isFinite(page) && page > 0 ? Math.min(page, 1000) : 1,
   }
 }
 
