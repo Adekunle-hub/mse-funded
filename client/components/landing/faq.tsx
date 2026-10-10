@@ -5,7 +5,7 @@ import { faqs } from "@/content/landing"
 
 export function Faq() {
   return (
-    <section aria-labelledby="faq-title" className="container-page py-12 sm:py-16 lg:py-20">
+    <section id="faq" aria-labelledby="faq-title" className="container-page py-12 sm:py-16 lg:py-20">
       <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:gap-16">
         <SectionHeading
           id="faq-title"
