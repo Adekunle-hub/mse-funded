@@ -1,5 +1,5 @@
 import { cva } from "class-variance-authority"
-import { AlarmClock, Calendar, CalendarX, Clock, type LucideIcon } from "lucide-react"
+import { AlarmClock, Calendar, CalendarCheck, CalendarX, Clock, type LucideIcon } from "lucide-react"
 
 import { getDeadlineStatus, type DeadlineUrgency } from "@/lib/scholarships/deadline"
 import { cn } from "@/lib/utils"
@@ -30,13 +30,22 @@ const urgencyIcons: Record<DeadlineUrgency, LucideIcon> = {
 }
 
 type DeadlineBadgeProps = {
-  deadline: string
+  deadline: string | null
   now: Date
   size?: "md" | "lg"
   className?: string
 }
 
 export function DeadlineBadge({ deadline, now, size = "md", className }: DeadlineBadgeProps) {
+  if (!deadline) {
+    return (
+      <span className={cn(badgeVariants({ urgency: "comfortable", size }), className)}>
+        <CalendarCheck aria-hidden="true" />
+        No fixed deadline
+      </span>
+    )
+  }
+
   const { urgency, label } = getDeadlineStatus(deadline, now, { withYear: size === "lg" })
   const Icon = urgencyIcons[urgency]
 
