@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import type { Env } from '../config/env.js';
+import { runWorkers } from '../config/jobs.js';
 import { EXTRACT_QUEUE } from '../queues.js';
 import { ExtractProcessor } from './extract.processor.js';
 import { ExtractionService } from './extraction.service.js';
@@ -18,7 +19,7 @@ import { ExtractionService } from './extraction.service.js';
         new Anthropic({ apiKey: config.get('ANTHROPIC_API_KEY', { infer: true }) || null }),
     },
     ExtractionService,
-    ExtractProcessor,
+    ...(runWorkers ? [ExtractProcessor] : []),
   ],
   exports: [ExtractionService],
 })
