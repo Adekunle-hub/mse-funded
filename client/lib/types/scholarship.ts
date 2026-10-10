@@ -29,7 +29,7 @@ export type ScholarshipSummary = {
   country: string
   fields: string[]
   fundingSummary: string
-  deadline: string
+  deadline: string | null
   deadlineZone: DeadlineZone
   officialUrl: string
   addedAt: string
