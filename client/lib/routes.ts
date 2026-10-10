@@ -5,15 +5,23 @@ export const routes = {
   tracker: "/tracker",
   login: "/login",
   signup: "/signup",
+  account: "/account",
   forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
+  admin: "/admin",
   howItWorks: "/#how-it-works",
   howWeCheck: "/#how-we-check",
-  howWeCheckDetail: "/how-we-check",
+  faq: "/#faq",
   about: "/about",
   contact: "/contact",
   privacy: "/privacy",
   terms: "/terms",
 } as const
+
+export function signupToSave(scholarshipId: string, returnTo: string) {
+  const params = new URLSearchParams({ save: scholarshipId, next: returnTo })
+  return `${routes.signup}?${params}`
+}
 
 export type NavLink = { label: string; href: string }
 
