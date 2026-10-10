@@ -2,26 +2,29 @@
 
 import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
-import type { FormEvent } from "react"
+import { useEffect, type FormEvent } from "react"
 
 import { FormAlert } from "@/components/auth/form-alert"
-import { GoogleButton, OrDivider } from "@/components/auth/google-button"
+import { GoogleSignIn } from "@/components/auth/google-sign-in"
 import { SubmitButton } from "@/components/auth/submit-button"
 import { TextField } from "@/components/auth/text-field"
+import { useCurrentUser, useFinishSignIn } from "@/hooks/use-auth"
 import { useFormFields } from "@/hooks/use-form-fields"
 import { signup } from "@/lib/api/auth"
-import {
-  MIN_PASSWORD_LENGTH,
-  safeNextPath,
-  validateEmail,
-  validateName,
-  validatePassword,
-} from "@/lib/auth/validation"
+import { ApiError } from "@/lib/api/client"
+import { MIN_PASSWORD_LENGTH, safeNextPath, validateEmail, validateName, validatePassword } from "@/lib/auth/validation"
 import { routes } from "@/lib/routes"
+
+function errorMessage(error: Error) {
+  if (error instanceof ApiError && (error.status === 400 || error.status === 409)) return error.message
+  if (error instanceof ApiError && error.status === 429) return "Too many attempts. Wait a minute and try again."
+  return "We couldn't create your account. Check your connection and try again."
+}
 
 export function SignupForm() {
   const router = useRouter()
-  const nextPath = () => safeNextPath(routes.tracker)
+  const { user } = useCurrentUser()
+  const finishSignIn = useFinishSignIn()
   const { values, field, validateAll } = useFormFields(
     { name: "", email: "", password: "" },
     {
@@ -31,10 +34,11 @@ export function SignupForm() {
     }
   )
 
-  const submit = useMutation({
-    mutationFn: signup,
-    onSuccess: () => router.push(nextPath()),
-  })
+  const submit = useMutation({ mutationFn: signup, onSuccess: finishSignIn })
+
+  useEffect(() => {
+    if (user && !submit.isPending && !submit.isSuccess) router.replace(safeNextPath(routes.tracker))
+  }, [user, submit.isPending, submit.isSuccess, router])
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -43,17 +47,18 @@ export function SignupForm() {
       event.currentTarget.querySelector<HTMLInputElement>(`[name="${firstInvalid}"]`)?.focus()
       return
     }
-    submit.mutate({ name: values.name.trim(), email: values.email.trim(), password: values.password })
+    submit.mutate({
+      name: values.name.trim(),
+      email: values.email.trim(),
+      password: values.password,
+    })
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <GoogleButton next={nextPath} />
-      <OrDivider />
+    <>
+      <GoogleSignIn />
       <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {submit.isError && (
-          <FormAlert message="We couldn't create your account. Check your connection and try again." />
-        )}
+        {submit.error && <FormAlert message={errorMessage(submit.error)} />}
         <TextField label="Full name" autoComplete="name" {...field("name")} />
         <TextField
           label="Email"
@@ -70,8 +75,12 @@ export function SignupForm() {
           hint={`At least ${MIN_PASSWORD_LENGTH} characters`}
           {...field("password")}
         />
-        <SubmitButton pending={submit.isPending} label="Create account" pendingLabel="Creating account…" />
+        <SubmitButton
+          pending={submit.isPending || submit.isSuccess}
+          label="Create account"
+          pendingLabel="Creating account…"
+        />
       </form>
-    </div>
+    </>
   )
 }
