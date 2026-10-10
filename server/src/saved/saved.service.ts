@@ -1,95 +1,105 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { ScholarshipsService } from '../scholarships/scholarships.service.js';
-import { toSummaryFromDetail } from '../shared/scholarships/summary.js';
-import type { ApplicationStatus, SavedScholarship, SavedScholarshipUpdate } from '../shared/types/saved.js';
+import { ApplicationStatus, type Prisma } from '../generated/prisma/client.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { toSummary } from '../scholarships/scholarship.mapper.js';
+import type { SavedScholarship } from '../shared/types/saved.js';
+import { UpdateSavedDto } from './dto/update-saved.dto.js';
 
-const STATUSES: ApplicationStatus[] = ['interested', 'applying', 'submitted'];
-const MAX_NOTE_LENGTH = 2000;
+const toDbStatus: Record<NonNullable<UpdateSavedDto['status']>, ApplicationStatus> = {
+  interested: ApplicationStatus.INTERESTED,
+  applying: ApplicationStatus.APPLYING,
+  submitted: ApplicationStatus.SUBMITTED,
+};
 
-function parseUpdate(body: unknown): SavedScholarshipUpdate {
-  const { status, note, remindersOn } = (body ?? {}) as Record<string, unknown>;
-  const update: SavedScholarshipUpdate = {};
+const fromDbStatus: Record<ApplicationStatus, SavedScholarship['status']> = {
+  [ApplicationStatus.INTERESTED]: 'interested',
+  [ApplicationStatus.APPLYING]: 'applying',
+  [ApplicationStatus.SUBMITTED]: 'submitted',
+};
 
-  if (status !== undefined) {
-    if (!STATUSES.includes(status as ApplicationStatus)) {
-      throw new BadRequestException(`status must be one of: ${STATUSES.join(', ')}`);
-    }
-    update.status = status as ApplicationStatus;
+type SavedRow = Prisma.SavedScholarshipGetPayload<{ include: { scholarship: true } }>;
+
+function toSaved(row: SavedRow): SavedScholarship {
+  return {
+    scholarship: toSummary(row.scholarship),
+    status: fromDbStatus[row.status],
+    note: row.note,
+    remindersOn: row.remindersOn,
+    savedAt: row.createdAt.toISOString(),
+    submittedAt: row.submittedAt?.toISOString(),
+  };
+}
+
+type SavedChanges = {
+  status?: ApplicationStatus;
+  note?: string;
+  remindersOn?: boolean;
+  submittedAt?: Date | null;
+};
+
+function changesFrom(dto: UpdateSavedDto, current?: SavedRow): SavedChanges {
+  const data: SavedChanges = {};
+  if (dto.note !== undefined) data.note = dto.note.trim();
+  if (dto.remindersOn !== undefined) data.remindersOn = dto.remindersOn;
+  if (dto.status !== undefined) {
+    data.status = toDbStatus[dto.status];
+    if (dto.status !== 'submitted') data.submittedAt = null;
+    else if (current?.status !== ApplicationStatus.SUBMITTED) data.submittedAt = new Date();
   }
-  if (note !== undefined) {
-    if (typeof note !== 'string' || note.length > MAX_NOTE_LENGTH) {
-      throw new BadRequestException(`note must be text of at most ${MAX_NOTE_LENGTH} characters`);
-    }
-    update.note = note.trim();
-  }
-  if (remindersOn !== undefined) {
-    if (typeof remindersOn !== 'boolean') throw new BadRequestException('remindersOn must be true or false');
-    update.remindersOn = remindersOn;
-  }
-  return update;
+  return data;
 }
 
 @Injectable()
 export class SavedService {
-  private readonly lists = new Map<string, SavedScholarship[]>();
+  constructor(private readonly prisma: PrismaService) {}
 
-  constructor(private readonly scholarships: ScholarshipsService) {}
-
-  list(owner: string): SavedScholarship[] {
-    return this.lists.get(owner) ?? [];
+  async list(userId: string): Promise<SavedScholarship[]> {
+    const rows = await this.prisma.savedScholarship.findMany({
+      where: { userId },
+      include: { scholarship: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map(toSaved);
   }
 
-  save(owner: string, scholarshipId: string, body: unknown): SavedScholarship {
-    const update = parseUpdate(body);
-    const items = this.list(owner);
-    const existing = items.find((item) => item.scholarship.id === scholarshipId);
-    if (existing) return this.applyUpdate(owner, existing, update);
+  async save(userId: string, slug: string, dto: UpdateSavedDto): Promise<SavedScholarship> {
+    const scholarship = await this.prisma.scholarship.findUnique({ where: { slug } });
+    if (!scholarship) throw new NotFoundException('Scholarship not found');
 
-    const scholarship = toSummaryFromDetail(this.scholarships.findOne(scholarshipId));
-    const created: SavedScholarship = {
-      scholarship,
-      status: 'interested',
-      note: '',
-      remindersOn: true,
-      savedAt: new Date().toISOString(),
-    };
-    this.lists.set(owner, [created, ...items]);
-    return this.applyUpdate(owner, created, update);
+    const current = await this.findSaved(userId, slug);
+    if (current) return this.applyChanges(current, dto);
+
+    const row = await this.prisma.savedScholarship.create({
+      data: { userId, scholarshipId: scholarship.id, ...changesFrom(dto) },
+      include: { scholarship: true },
+    });
+    return toSaved(row);
   }
 
-  update(owner: string, scholarshipId: string, body: unknown): SavedScholarship {
-    const existing = this.list(owner).find((item) => item.scholarship.id === scholarshipId);
-    if (!existing) throw new NotFoundException('This scholarship is not in your saved list');
-    return this.applyUpdate(owner, existing, parseUpdate(body));
+  async update(userId: string, slug: string, dto: UpdateSavedDto): Promise<SavedScholarship> {
+    const current = await this.findSaved(userId, slug);
+    if (!current) throw new NotFoundException('This scholarship is not in your saved list');
+    return this.applyChanges(current, dto);
   }
 
-  remove(owner: string, scholarshipId: string) {
-    this.lists.set(
-      owner,
-      this.list(owner).filter((item) => item.scholarship.id !== scholarshipId),
-    );
+  async remove(userId: string, slug: string): Promise<void> {
+    await this.prisma.savedScholarship.deleteMany({ where: { userId, scholarship: { slug } } });
   }
 
-  mergeInto(fromOwner: string, toOwner: string) {
-    if (fromOwner === toOwner) return;
-    const target = this.list(toOwner);
-    const additions = this.list(fromOwner).filter(
-      (item) => !target.some((existing) => existing.scholarship.id === item.scholarship.id),
-    );
-    this.lists.set(toOwner, [...additions, ...target]);
-    this.lists.delete(fromOwner);
+  private findSaved(userId: string, slug: string) {
+    return this.prisma.savedScholarship.findFirst({
+      where: { userId, scholarship: { slug } },
+      include: { scholarship: true },
+    });
   }
 
-  private applyUpdate(owner: string, entry: SavedScholarship, update: SavedScholarshipUpdate): SavedScholarship {
-    const next: SavedScholarship = { ...entry, ...update };
-    if (update.status === 'submitted' && entry.status !== 'submitted') next.submittedAt = new Date().toISOString();
-    if (update.status && update.status !== 'submitted') delete next.submittedAt;
-
-    this.lists.set(
-      owner,
-      this.list(owner).map((item) => (item.scholarship.id === entry.scholarship.id ? next : item)),
-    );
-    return next;
+  private async applyChanges(current: SavedRow, dto: UpdateSavedDto) {
+    const row = await this.prisma.savedScholarship.update({
+      where: { id: current.id },
+      data: changesFrom(dto, current),
+      include: { scholarship: true },
+    });
+    return toSaved(row);
   }
 }
