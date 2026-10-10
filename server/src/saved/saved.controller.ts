@@ -1,48 +1,33 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Put, Req, Res } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Put, UseGuards } from '@nestjs/common';
 
-import { SessionService } from '../session/session.service.js';
+import { AuthGuard } from '../auth/auth.guard.js';
+import { CurrentUserId } from '../auth/current-user-id.decorator.js';
+import { UpdateSavedDto } from './dto/update-saved.dto.js';
 import { SavedService } from './saved.service.js';
 
+@UseGuards(AuthGuard)
 @Controller('me/saved')
 export class SavedController {
-  constructor(
-    private readonly saved: SavedService,
-    private readonly sessions: SessionService,
-  ) {}
-
-  private owner(request: Request, response: Response) {
-    return this.sessions.ownerKey(this.sessions.ensure(request, response));
-  }
+  constructor(private readonly saved: SavedService) {}
 
   @Get()
-  list(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
-    return this.saved.list(this.owner(request, response));
+  list(@CurrentUserId() userId: string) {
+    return this.saved.list(userId);
   }
 
   @Put(':id')
-  save(
-    @Param('id') id: string,
-    @Body() body: unknown,
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    return this.saved.save(this.owner(request, response), id, body);
+  save(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: UpdateSavedDto) {
+    return this.saved.save(userId, id, dto);
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() body: unknown,
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    return this.saved.update(this.owner(request, response), id, body);
+  update(@CurrentUserId() userId: string, @Param('id') id: string, @Body() dto: UpdateSavedDto) {
+    return this.saved.update(userId, id, dto);
   }
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string, @Req() request: Request, @Res({ passthrough: true }) response: Response) {
-    this.saved.remove(this.owner(request, response), id);
+  remove(@CurrentUserId() userId: string, @Param('id') id: string) {
+    return this.saved.remove(userId, id);
   }
 }
