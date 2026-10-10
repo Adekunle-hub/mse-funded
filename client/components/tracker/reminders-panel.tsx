@@ -1,4 +1,4 @@
-import { AlarmClock, Bell, MessageCircle } from "lucide-react"
+import { AlarmClock, Bell, Mail } from "lucide-react"
 
 import { monthDayParts } from "@/lib/format/date"
 import { closesInLabel, upcomingReminders } from "@/lib/scholarships/tracker"
@@ -14,6 +14,7 @@ function ReminderRows({ rows, urgent }: ReminderRowsProps) {
   return (
     <ul>
       {rows.map(({ entry, days }) => {
+        if (!entry.scholarship.deadline) return null
         const { month, day } = monthDayParts(entry.scholarship.deadline)
         return (
           <li key={entry.scholarship.id} className="flex items-center gap-3 border-t border-hairline py-3 first:border-t-0">
@@ -74,8 +75,8 @@ export function RemindersPanel({ entries, now }: { entries: SavedScholarship[]; 
         <ReminderList entries={entries} now={now} />
       </div>
       <p className="mt-2 flex gap-2 border-t border-hairline pt-4 type-body-sm text-ink-muted">
-        <MessageCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-        We send reminders 14, 7 and 1 day before each saved deadline.
+        <Mail aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+        We email you 7, 3 and 1 day before each saved deadline.
       </p>
     </section>
   )
