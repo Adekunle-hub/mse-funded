@@ -1,0 +1,12 @@
+{
+  "name": "msefunded",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix client install && npm --prefix server install",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run start:dev",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "lint": "npm --prefix server run lint && npm --prefix client run lint",
+    "test": "npm --prefix server run test:e2e"
+  }
+}
