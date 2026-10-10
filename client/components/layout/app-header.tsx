@@ -1,10 +1,8 @@
-import Link from "next/link"
 import type { ReactNode } from "react"
 
 import { Wordmark } from "@/components/brand/wordmark"
 import { AppNav } from "@/components/layout/app-nav"
-import { buttonVariants } from "@/components/ui/button"
-import { routes } from "@/lib/routes"
+import { MobileUserLink, UserMenu } from "@/components/layout/user-menu"
 import { cn } from "@/lib/utils"
 
 type AppHeaderProps = {
@@ -21,22 +19,14 @@ export function AppHeader({ mobileStart }: AppHeaderProps) {
           <AppNav className="max-lg:hidden" />
         </div>
 
-        <div className="flex items-center gap-4 max-lg:hidden">
-          <Link href={routes.login} className={buttonVariants({ variant: "outline", size: "sm" })}>
-            Log in
-          </Link>
-          <Link href={routes.signup} className={buttonVariants({ variant: "outline", size: "sm" })}>
-            Sign up
-          </Link>
+        <div className="max-lg:hidden">
+          <UserMenu />
         </div>
 
         {!mobileStart && (
-          <Link
-            href={routes.login}
-            className="inline-flex h-12 items-center px-3 type-button text-ink lg:hidden"
-          >
-            Log in
-          </Link>
+          <div className="lg:hidden">
+            <MobileUserLink />
+          </div>
         )}
       </div>
     </header>
