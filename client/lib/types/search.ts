@@ -35,6 +35,8 @@ export type FilterSuggestion = {
 export type SearchResult = {
   items: ScholarshipSummary[]
   total: number
+  page: number
+  pageCount: number
   pageSize: number
   facets: SearchFacets
   suggestions: FilterSuggestion[]
