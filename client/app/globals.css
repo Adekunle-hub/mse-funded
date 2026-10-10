@@ -46,8 +46,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  --font-serif: var(--font-source-serif), "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-heading: var(--font-sans);
 
   --color-ink: var(--ink);
@@ -104,38 +104,32 @@
 }
 
 @utility type-display-1 {
-  font-family: var(--font-serif);
-  font-weight: 400;
+  font-weight: 600;
   font-size: 72px;
-  line-height: 1.02;
-  letter-spacing: -0.02em;
-  font-optical-sizing: auto;
+  line-height: 1;
+  letter-spacing: -0.045em;
 }
 
 @utility type-display-2 {
-  font-family: var(--font-serif);
-  font-weight: 400;
+  font-weight: 600;
   font-size: 56px;
-  line-height: 1.08;
-  letter-spacing: -0.018em;
-  font-optical-sizing: auto;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
 }
 
 @utility type-display-3 {
-  font-family: var(--font-serif);
-  font-weight: 400;
+  font-weight: 600;
   font-size: 46px;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
-  font-optical-sizing: auto;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
 }
 
 @utility type-numeral {
-  font-family: var(--font-serif);
-  font-weight: 400;
+  font-weight: 600;
   font-size: 64px;
   line-height: 1;
-  font-optical-sizing: auto;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 @utility type-heading-1 {
