@@ -17,7 +17,7 @@ export function FinalCta({ openCount }: { openCount: number }) {
           {openCount} funded places are open right now.
         </h2>
         <p className="mx-auto mt-3 max-w-130 type-body-lg text-ink-muted">
-          Each one links to the official page, with a deadline a person has checked.
+          Each one links to the official page, with the deadline taken from it.
         </p>
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <Magnetic>
