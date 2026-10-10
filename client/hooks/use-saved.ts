@@ -3,19 +3,22 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import { useToast } from "@/components/feedback/toast"
-import { useHydrated } from "@/hooks/use-hydrated"
+import { useCurrentUser } from "@/hooks/use-auth"
 import { savedApi } from "@/lib/api/saved"
+import { queryKeys } from "@/lib/query-keys"
 import { formatDate } from "@/lib/format/date"
 import type { ScholarshipSummary } from "@/lib/types/scholarship"
 import type { SavedScholarship, SavedScholarshipUpdate } from "@/lib/types/saved"
 
-export const savedQueryKey = ["saved"] as const
+const savedQueryKey = queryKeys.saved
 
 export function useSavedList() {
-  const hydrated = useHydrated()
-  const query = useQuery({ queryKey: savedQueryKey, queryFn: savedApi.list })
-  // Saved data lives only in the browser; match the server render until hydration completes.
-  return hydrated ? query : { ...query, data: undefined, isPending: true as const }
+  const { user, isLoading } = useCurrentUser()
+  const query = useQuery({ queryKey: savedQueryKey, queryFn: savedApi.list, enabled: Boolean(user) })
+
+  if (isLoading) return { data: undefined, isPending: true, isError: false, refetch: query.refetch }
+  if (!user) return { data: [] as SavedScholarship[], isPending: false, isError: false, refetch: query.refetch }
+  return { data: query.data, isPending: query.isPending, isError: query.isError, refetch: query.refetch }
 }
 
 export function useSavedEntry(id: string) {
@@ -48,7 +51,7 @@ export function useToggleSave() {
 
   const mutation = useMutation({
     mutationFn: ({ scholarship, save }: { scholarship: ScholarshipSummary; save: boolean }) =>
-      save ? savedApi.save(scholarship).then(() => undefined) : savedApi.remove(scholarship.id),
+      save ? savedApi.save(scholarship.id).then(() => undefined) : savedApi.remove(scholarship.id),
     onMutate: ({ scholarship, save }) =>
       optimistic.apply((items) =>
         save
@@ -76,7 +79,9 @@ export function useToggleSave() {
       if (!save) return
       toast({
         tone: "saved",
-        message: `Saved. We'll remind you before ${formatDate(scholarship.deadline, { withYear: false })}.`,
+        message: scholarship.deadline
+          ? `Saved. We'll remind you before ${formatDate(scholarship.deadline, { withYear: false })}.`
+          : "Saved to your list.",
         action: { label: "Undo", onClick: () => mutation.mutate({ scholarship, save: false }) },
       })
     },
@@ -110,7 +115,7 @@ export function useRemoveSaved() {
   const optimistic = useOptimisticSaved()
 
   const restore = useMutation({
-    mutationFn: (entry: SavedScholarship) => savedApi.restore(entry),
+    mutationFn: (entry: SavedScholarship) => savedApi.restore(entry).then(() => undefined),
     onSettled: optimistic.settle,
   })
 
