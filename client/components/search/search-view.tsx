@@ -1,21 +1,18 @@
-import Link from "next/link"
-
 import { ResultCard } from "@/components/scholarship/result-card"
 import { SaveButton } from "@/components/scholarship/save-button"
 import { ActiveFilterChips } from "@/components/search/active-filter-chips"
 import { EmptyResults } from "@/components/search/empty-results"
 import { FilterSheet } from "@/components/search/filter-sheet"
 import { FilterSidebar } from "@/components/search/filter-sidebar"
+import { Pagination } from "@/components/search/pagination"
 import { ResultsCount } from "@/components/search/results-count"
 import { SearchBar } from "@/components/search/search-bar"
 import { SearchController } from "@/components/search/search-controller"
 import { SortSelect } from "@/components/search/sort-select"
-import { buttonVariants } from "@/components/ui/button"
 import { searchScholarships } from "@/lib/api/scholarships"
 import { routes } from "@/lib/routes"
-import { parseSearchFilters, searchHref } from "@/lib/scholarships/filters"
+import { parseSearchFilters } from "@/lib/scholarships/filters"
 import { getRenderTime } from "@/lib/time"
-import { cn } from "@/lib/utils"
 
 type SearchViewProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -24,7 +21,6 @@ type SearchViewProps = {
 export async function SearchView({ searchParams }: SearchViewProps) {
   const filters = parseSearchFilters(await searchParams)
   const [result, now] = await Promise.all([searchScholarships(filters), getRenderTime()])
-  const remaining = result.total - result.items.length
 
   return (
     <SearchController>
@@ -66,15 +62,7 @@ export async function SearchView({ searchParams }: SearchViewProps) {
             </ul>
           )}
 
-          {remaining > 0 && (
-            <Link
-              href={searchHref({ ...filters, page: filters.page + 1 })}
-              scroll={false}
-              className={cn(buttonVariants({ variant: "outline" }), "mt-2 w-full")}
-            >
-              Show {Math.min(remaining, result.pageSize)} more ({remaining} left)
-            </Link>
-          )}
+          <Pagination filters={filters} page={result.page} pageCount={result.pageCount} />
         </section>
       </div>
     </SearchController>
