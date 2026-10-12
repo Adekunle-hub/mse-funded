@@ -11,7 +11,9 @@ export default defineConfig({
     testTimeout: 30_000,
     env: {
       QUEUE_PREFIX: 'test',
-      ANTHROPIC_API_KEY: '',
+      GEMINI_API_KEY: '',
+      EXA_API_KEY: '',
+      JINA_API_KEY: '',
       REVALIDATE_SECRET: '',
       RESEND_API_KEY: '',
       GOOGLE_CLIENT_ID: 'test-client.apps.googleusercontent.com',
