@@ -4,7 +4,7 @@ import type { DeadlineWindow, MultiFilterKey, SearchFilters, SortOption } from "
 
 export const SEARCH_PAGE_SIZE = 10
 
-export const fieldOptions = ["Polymers", "Ceramics", "Metals", "Nanomaterials", "Composites", "Corrosion"]
+export const fieldOptions = ["Polymers", "Ceramics", "Metals", "Nanomaterials", "Composites", "Corrosion", "Manufacturing", "Sustainable energy"]
 
 export const deadlineOptions: { value: DeadlineWindow; label: string }[] = [
   { value: "any", label: "Any" },
