@@ -44,9 +44,9 @@ jobs:
       TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -64,7 +64,7 @@ jobs:
           esac
           echo "task=${task:-pipeline}" >> "$GITHUB_OUTPUT"
 
-      - run: npm ci
+      - run: npm ci --include=dev
       - run: npm run build
 
       - name: Crawl, read with Claude and verify
