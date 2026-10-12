@@ -44,9 +44,7 @@ export class ScholarshipsController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post(':id/reports')
   @HttpCode(201)
-  async report(@Param('id') id: string, @Body() dto: CreateReportDto) {
-    await this.scholarships.findOne(id);
-    const { id: reportId, createdAt } = this.reports.create(id, dto);
-    return { id: reportId, createdAt };
+  report(@Param('id') id: string, @Body() dto: CreateReportDto) {
+    return this.reports.create(id, dto);
   }
 }
