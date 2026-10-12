@@ -52,29 +52,50 @@ function refreshSession(): Promise<boolean> {
   return refreshing
 }
 
-export async function apiFetch<T>(
-  path: string,
-  { query, headers, ...init }: RequestInit & { query?: QueryParams } = {}
-): Promise<T> {
+type RequestOptions = RequestInit & { query?: QueryParams }
+
+async function request(path: string, { query, headers, ...init }: RequestOptions) {
+  const isJson = typeof init.body === "string"
   const send = () =>
     fetch(buildUrl(path, query), {
       credentials: "include",
       ...init,
-      headers: { Accept: "application/json", ...(init.body ? { "Content-Type": "application/json" } : {}), ...headers },
+      headers: { Accept: "application/json", ...(isJson ? { "Content-Type": "application/json" } : {}), ...headers },
     })
 
-  let response = await send()
+  const response = await send()
   if (response.status === 401 && !pathsWithoutRefresh.includes(path) && (await refreshSession())) {
-    response = await send()
+    return send()
   }
+  return response
+}
 
+async function toApiError(response: Response) {
   const body = await readBody(response)
+  const raw =
+    typeof body === "object" && body !== null && "message" in body ? (body as { message: unknown }).message : null
+  const message = Array.isArray(raw) ? raw.join(". ") : raw ? String(raw) : response.statusText
+  return new ApiError(response.status, message, body)
+}
 
-  if (!response.ok) {
-    const raw = typeof body === "object" && body !== null && "message" in body ? (body as { message: unknown }).message : null
-    const message = Array.isArray(raw) ? raw.join(". ") : raw ? String(raw) : response.statusText
-    throw new ApiError(response.status, message, body)
+export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const response = await request(path, options)
+  if (!response.ok) throw await toApiError(response)
+  return (await readBody(response)) as T
+}
+
+export async function apiStream(path: string, options: RequestOptions, onText: (text: string) => void) {
+  const response = await request(path, options)
+  if (!response.ok || !response.body) throw await toApiError(response)
+
+  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) return
+    onText(value)
   }
+}
 
-  return body as T
+export function apiUrl(path: string) {
+  return buildUrl(path).toString()
 }
