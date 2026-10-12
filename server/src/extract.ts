@@ -11,7 +11,6 @@ import { EXTRACT_QUEUE } from './queues.js';
 const app = await NestFactory.createApplicationContext(AppModule);
 const queue = app.get<Queue>(getQueueToken(EXTRACT_QUEUE));
 
-await queue.resume();
 
 console.log(`Queued ${await app.get(ExtractionService).enqueuePending()} pages`);
 while ((await queue.getWaitingCount()) + (await queue.getActiveCount()) > 0) {
