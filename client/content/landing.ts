@@ -56,6 +56,16 @@ export const fieldGuide = [
     title: "Corrosion",
     description: "How metals degrade in service, and the coatings and alloys that slow it down.",
   },
+  {
+    name: "Manufacturing",
+    title: "Manufacturing",
+    description: "Turning materials into parts, from 3D printing and welding to machining and forming.",
+  },
+  {
+    name: "Sustainable energy",
+    title: "Sustainable energy",
+    description: "Materials for solar cells, batteries, hydrogen and fuel cells, and cleaner industry.",
+  },
 ]
 
 export type TetrahedronNode = "processing" | "structure" | "properties" | "performance" | "characterisation"
