@@ -8,6 +8,6 @@ import { StatsController } from './stats.controller.js';
 @Module({
   controllers: [ScholarshipsController, StatsController],
   providers: [ScholarshipsService, ReportsService],
-  exports: [ScholarshipsService],
+  exports: [ScholarshipsService, ReportsService],
 })
 export class ScholarshipsModule {}
