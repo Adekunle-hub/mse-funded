@@ -2,10 +2,10 @@ name: Background jobs
 
 on:
   schedule:
-    - cron: "0 */3 * * *"
-    - cron: "0 4 * * *"
-    - cron: "0 5 * * *"
-    - cron: "0 7 * * *"
+    - cron: "17 */3 * * *"
+    - cron: "47 4 * * *"
+    - cron: "47 5 * * *"
+    - cron: "47 7 * * *"
   workflow_dispatch:
     inputs:
       task:
@@ -58,10 +58,10 @@ jobs:
         id: task
         run: |
           case "${{ github.event.schedule }}" in
-            "0 4 * * *") task=recheck ;;
-            "0 5 * * *") task=discover ;;
-            "0 7 * * *") task=remind ;;
-            "0 */3 * * *") task=pipeline ;;
+            "47 4 * * *") task=recheck ;;
+            "47 5 * * *") task=discover ;;
+            "47 7 * * *") task=remind ;;
+            "17 */3 * * *") task=pipeline ;;
             *) task="${{ inputs.task }}" ;;
           esac
           echo "task=${task:-pipeline}" >> "$GITHUB_OUTPUT"
@@ -69,7 +69,7 @@ jobs:
       - run: npm ci --include=dev
       - run: npm run build
 
-      - name: Crawl, read with Claude and verify
+      - name: Crawl, read with Gemini and verify
         if: steps.task.outputs.task == 'pipeline'
         run: |
           npm run crawl
