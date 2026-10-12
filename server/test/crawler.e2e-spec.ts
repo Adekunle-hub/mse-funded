@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 import { getQueueToken } from '@nestjs/bullmq';
 import type { INestApplicationContext } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
@@ -19,13 +19,16 @@ const pages: Record<string, { type: string; body: string }> = {
   '/robots.txt': { type: 'text/plain', body: 'User-agent: *\nDisallow: /private' },
   '/scholarships': { type: 'text/html', body: '<h1>Funded PhD in corrosion</h1>' },
   '/private': { type: 'text/html', body: '<h1>Hidden</h1>' },
+  '/department': { type: 'text/html', body: '<h1>About our department</h1><p>Undergraduate teaching and research.</p>' },
   '/brochure.pdf': { type: 'application/pdf', body: '%PDF-1.4' },
+  '/app': { type: 'text/html', body: '<div id="root"></div><script src="/app.js"></script>' },
   '/opportunities': {
     type: 'text/html',
     body: [
       '<a href="/projects/funded-phd-in-alloys">Funded PhD in alloys</a>',
       '<a href="/projects/msc-scholarship#apply">MSc scholarship</a>',
       '<a href="/about">About us</a>',
+      '<a href="/projects/phd-in-machine-learning">PhD in machine learning</a>',
       '<a href="https://elsewhere.example/phd">PhD elsewhere</a>',
     ].join(''),
   },
@@ -49,10 +52,10 @@ describe('Crawler (e2e)', () => {
     await new Promise<void>((resolve) => server.listen(0, resolve));
     baseUrl = `http://localhost:${(server.address() as AddressInfo).port}`;
 
-    const notRelevant = { model: 'fake', stop_reason: 'end_turn', parsed_output: { relevant: false, reason: 'Test' }, usage: { input_tokens: 0, output_tokens: 0 } };
+    const notRelevant = { text: JSON.stringify({ relevant: false, reason: 'Test' }), usageMetadata: {} };
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(Anthropic)
-      .useValue({ messages: { parse: async () => notRelevant } })
+      .overrideProvider(GoogleGenAI)
+      .useValue({ models: { generateContent: async () => notRelevant } })
       .compile();
     app = await moduleRef.init();
     prisma = app.get(PrismaService);
@@ -86,6 +89,16 @@ describe('Crawler (e2e)', () => {
     const saved = await prisma.rawPage.findMany({ where: { sourceId: source.id } });
     expect(saved).toHaveLength(1);
     expect(saved[0].body).toContain('corrosion');
+  });
+
+  it('saves pages that never mention funded study as already checked, without asking the AI', async () => {
+    const source = await addSource('/department');
+    expect((await crawler.crawlSource(source)).saved).toBe(true);
+
+    const page = await prisma.rawPage.findFirstOrThrow({ where: { sourceId: source.id } });
+    expect(page.extractionStatus).toBe('NOT_A_SCHOLARSHIP');
+    const jobs = await app.get<Queue>(getQueueToken(EXTRACT_QUEUE)).getJobs(['waiting', 'active', 'completed', 'failed', 'delayed']);
+    expect(jobs.map((job) => job.data.rawPageId)).not.toContain(page.id);
   });
 
   it('respects robots.txt', async () => {
@@ -128,11 +141,33 @@ describe('Crawler (e2e)', () => {
     expect(again.discovered).toBe(0);
   });
 
-  it('builds 24 discovery searches and skips them without an API key', async () => {
+  it('reads pages that need JavaScript through Jina Reader', async () => {
+    const readerText = `# Funded PhD in battery materials
+
+${'Full stipend and tuition for international students. '.repeat(10)}`;
+    const realFetch = globalThis.fetch;
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation((input, init) =>
+        String(input).startsWith('https://r.jina.ai/') ? Promise.resolve(new Response(readerText)) : realFetch(input, init),
+      );
+
+    const source = await addSource('/app');
+    const { saved } = await crawler.crawlSource(source);
+    fetchSpy.mockRestore();
+
+    expect(saved).toBe(true);
+    const page = await prisma.rawPage.findFirstOrThrow({ where: { sourceId: source.id } });
+    expect(page.contentType).toBe('text/markdown');
+    expect(page.body).toContain('battery materials');
+  });
+
+  it('builds 30 discovery searches and skips them without a search key', async () => {
     const discovery = app.get(DiscoveryService);
-    expect(discovery.queries).toHaveLength(24);
+    expect(discovery.queries).toHaveLength(30);
     expect(discovery.queries).toContain('"metallurgy" funded PhD studentship');
-    if (!process.env.TAVILY_API_KEY) expect(await discovery.discover()).toBe(0);
+    expect(discovery.queries).toContain('"sustainable energy" MSc scholarship');
+    if (!process.env.TAVILY_API_KEY && !process.env.EXA_API_KEY) expect(await discovery.discover()).toBe(0);
   });
 
   describe('crawl worker', () => {
