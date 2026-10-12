@@ -11,6 +11,8 @@ export default defineConfig({
     testTimeout: 30_000,
     env: {
       QUEUE_PREFIX: 'test',
+      RUN_WORKERS: 'true',
+      RUN_SCHEDULES: 'true',
       GEMINI_API_KEY: '',
       EXA_API_KEY: '',
       JINA_API_KEY: '',
