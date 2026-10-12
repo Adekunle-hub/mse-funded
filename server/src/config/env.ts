@@ -19,6 +19,7 @@ const envSchema = z.object({
   EXA_API_KEY: z.string().optional(),
   JINA_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
+  ASSISTANT_MODEL: z.string().min(1).default('gemini-3.5-flash-lite'),
   REVALIDATE_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().min(3).default('MseFunded <onboarding@resend.dev>'),
