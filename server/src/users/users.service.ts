@@ -4,13 +4,40 @@ import type { GoogleProfile } from '../auth/google-auth.service.js';
 import { Prisma, type User } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
-const publicUserFields = { id: true, name: true, email: true, role: true } as const;
+const publicUserFields = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  createdAt: true,
+  passwordHash: true,
+  googleId: true,
+  avatarUpdatedAt: true,
+} as const;
 
-export type PublicUser = { id: string; name: string; email: string; isAdmin: boolean };
+export type PublicUser = {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  memberSince: string;
+  avatarUrl: string | null;
+  signInMethods: { password: boolean; google: boolean };
+};
 export type NewUser = { name: string; email: string; passwordHash: string };
 
-export function toPublicUser({ id, name, email, role }: Pick<User, 'id' | 'name' | 'email' | 'role'>): PublicUser {
-  return { id, name, email, isAdmin: role === 'ADMIN' };
+type UserFields = Pick<User, 'id' | 'name' | 'email' | 'role' | 'createdAt' | 'passwordHash' | 'googleId' | 'avatarUpdatedAt'>;
+
+export function toPublicUser({ id, name, email, role, createdAt, passwordHash, googleId, avatarUpdatedAt }: UserFields): PublicUser {
+  return {
+    id,
+    name,
+    email,
+    isAdmin: role === 'ADMIN',
+    memberSince: createdAt.toISOString(),
+    avatarUrl: avatarUpdatedAt ? `/users/${id}/avatar?v=${avatarUpdatedAt.getTime()}` : null,
+    signInMethods: { password: Boolean(passwordHash), google: Boolean(googleId) },
+  };
 }
 
 @Injectable()
@@ -59,5 +86,16 @@ export class UsersService {
 
   async updatePassword(id: string, passwordHash: string): Promise<void> {
     await this.prisma.user.update({ where: { id }, data: { passwordHash } });
+  }
+
+  async setAvatar(id: string, image: { data: Uint8Array<ArrayBuffer>; type: string } | null): Promise<PublicUser> {
+    const data = image
+      ? { avatar: image.data, avatarType: image.type, avatarUpdatedAt: new Date() }
+      : { avatar: null, avatarType: null, avatarUpdatedAt: null };
+    return toPublicUser(await this.prisma.user.update({ where: { id }, data, select: publicUserFields }));
+  }
+
+  findAvatar(id: string) {
+    return this.prisma.user.findUnique({ where: { id }, select: { avatar: true, avatarType: true } });
   }
 }
