@@ -176,6 +176,7 @@ model Scholarship {
   rawPage       RawPage?               @relation(fields: [rawPageId], references: [id], onDelete: SetNull)
   savedBy       SavedScholarship[]
   opportunities ExtractedOpportunity[]
+  reports       Report[]
 
   @@unique([funder, name, intakeYear])
   @@index([status, deadline])
@@ -183,6 +184,19 @@ model Scholarship {
   @@index([level])
   @@index([fundingType])
   @@index([fields], type: Gin)
+}
+
+model Report {
+  id            String    @id @default(uuid()) @db.Uuid
+  scholarshipId String    @db.Uuid
+  reason        String
+  details       String?
+  resolvedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@index([resolvedAt, createdAt])
 }
 
 enum UserRole {
