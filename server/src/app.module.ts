@@ -6,6 +6,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { AdminModule } from './admin/admin.module.js';
+import { AssistantModule } from './assistant/assistant.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { AppConfigModule } from './config/app-config.module.js';
 import type { Env } from './config/env.js';
@@ -40,6 +41,7 @@ import { VerificationModule } from './verification/verification.module.js';
     UsersModule,
     AuthModule,
     AdminModule,
+    AssistantModule,
     ScholarshipsModule,
     SavedModule,
     SourcesModule,
