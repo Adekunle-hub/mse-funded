@@ -144,7 +144,7 @@ export function MobileMenu() {
             {user ? (
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <UserAvatar name={user.name} size={40} />
+                  <UserAvatar name={user.name} imageUrl={user.avatarUrl} size={40} />
                   <div className="min-w-0">
                     <p className="truncate type-label text-ink">{user.name}</p>
                     <p className="truncate type-body-sm text-ink-muted">{user.email}</p>
