@@ -1,8 +1,7 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { getQueueToken } from '@nestjs/bullmq';
+import { ApiError, GoogleGenAI } from '@google/genai';
 import type { INestApplicationContext } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import type { Job, Queue } from 'bullmq';
+import type { Job } from 'bullmq';
 
 import { AppModule } from './../src/app.module.js';
 import { ExtractProcessor } from './../src/extraction/extract.processor.js';
@@ -10,7 +9,7 @@ import type { Opportunity } from './../src/extraction/extraction.schema.js';
 import { ExtractionService } from './../src/extraction/extraction.service.js';
 import { pageText } from './../src/extraction/page-text.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
-import { EXTRACT_QUEUE, type ExtractJob } from './../src/queues.js';
+import type { ExtractJob } from './../src/queues.js';
 
 const PREFIX = `https://extraction-test.example/${Date.now()}`;
 
@@ -36,11 +35,9 @@ const opportunity: Opportunity = {
   officialUrl: null,
 };
 
-const reply = <T>(model: string, parsed_output: T | null, stop_reason = 'end_turn') => ({
-  model,
-  stop_reason,
-  parsed_output,
-  usage: { input_tokens: 1200, output_tokens: 150 },
+const reply = <T>(data: T | null) => ({
+  text: data === null ? '' : JSON.stringify(data),
+  usageMetadata: { promptTokenCount: 1200, candidatesTokenCount: 150, thoughtsTokenCount: 50 },
 });
 
 describe('Extraction (e2e)', () => {
@@ -52,8 +49,13 @@ describe('Extraction (e2e)', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
-      .overrideProvider(Anthropic)
-      .useValue({ messages: { parse: screen }, beta: { messages: { parse: extract } } })
+      .overrideProvider(GoogleGenAI)
+      .useValue({
+        models: {
+          generateContent: (request: { model: string }) =>
+            request.model.includes('lite') ? screen(request) : extract(request),
+        },
+      })
       .compile();
     app = await moduleRef.init();
     prisma = app.get(PrismaService);
@@ -72,15 +74,11 @@ describe('Extraction (e2e)', () => {
     extract.mockReset();
   });
 
-  const addPage = (path: string) =>
-    prisma.rawPage.create({
-      data: {
-        url: `${PREFIX}${path}`,
-        httpStatus: 200,
-        contentHash: path,
-        body: '<html><head><title>PhD studentships</title></head><body><nav>Menu</nav><main><h1>Funded PhD</h1><p>Corrosion project</p></main><script>track()</script></body></html>',
-      },
-    });
+  const STUDENTSHIP_PAGE =
+    '<html><head><title>PhD studentships</title></head><body><nav>Menu</nav><main><h1>Funded PhD</h1><p>Corrosion project</p></main><script>track()</script></body></html>';
+
+  const addPage = (path: string, body = STUDENTSHIP_PAGE) =>
+    prisma.rawPage.create({ data: { url: `${PREFIX}${path}`, httpStatus: 200, contentHash: path, body } });
 
   it('keeps the main content and drops menus and scripts', () => {
     const text = pageText(
@@ -89,9 +87,17 @@ describe('Extraction (e2e)', () => {
     expect(text).toBe('Opportunities\n\nPhD\nFunded');
   });
 
+  it('skips the AI for pages that never mention funded MSc or PhD study', async () => {
+    const page = await addPage('/about', '<main><h1>About our department</h1><p>We teach undergraduate courses.</p></main>');
+
+    await expect(extraction.extract(page.id)).resolves.toEqual({ status: 'NOT_A_SCHOLARSHIP', opportunities: 0 });
+    expect(screen).not.toHaveBeenCalled();
+    expect(extract).not.toHaveBeenCalled();
+  });
+
   it('stops after screening when the page is not relevant', async () => {
     const page = await addPage('/news');
-    screen.mockResolvedValue(reply('claude-haiku-5-5', { relevant: false, reason: 'A news article' }));
+    screen.mockResolvedValue(reply({ relevant: false, reason: 'A news article' }));
 
     await expect(extraction.extract(page.id)).resolves.toEqual({ status: 'NOT_A_SCHOLARSHIP', opportunities: 0 });
     expect(extract).not.toHaveBeenCalled();
@@ -102,13 +108,13 @@ describe('Extraction (e2e)', () => {
 
   it('extracts and saves every opportunity on a relevant page', async () => {
     const page = await addPage('/phds');
-    screen.mockResolvedValue(reply('claude-haiku-5-5', { relevant: true, reason: 'Funded PhD advert' }));
+    screen.mockResolvedValue(reply({ relevant: true, reason: 'Funded PhD advert' }));
     extract.mockResolvedValue(
-      reply('claude-opus-5-5', { opportunities: [opportunity, { ...opportunity, title: 'MSc scholarship', level: 'MSC' }] }),
+      reply({ opportunities: [opportunity, { ...opportunity, title: 'MSc scholarship', level: 'MSC' }] }),
     );
 
     await expect(extraction.extract(page.id)).resolves.toEqual({ status: 'EXTRACTED', opportunities: 2 });
-    expect(extract.mock.calls[0][0]).toMatchObject({ model: 'claude-opus-5-5', fallbacks: 'default' });
+    expect(extract.mock.calls[0][0]).toMatchObject({ model: 'gemini-3.5-flash' });
 
     const saved = await prisma.extractedOpportunity.findMany({ where: { rawPageId: page.id }, orderBy: { title: 'asc' } });
     expect(saved.map((row) => row.title)).toEqual(['Funded PhD in corrosion of high entropy alloys', 'MSc scholarship']);
@@ -119,17 +125,17 @@ describe('Extraction (e2e)', () => {
     expect(usage.map((row) => row.stage)).toEqual(['screen', 'extract']);
   });
 
-  it('marks the page failed when extraction is refused', async () => {
+  it('marks the page failed when Gemini gives no usable answer', async () => {
     const page = await addPage('/refused');
-    screen.mockResolvedValue(reply('claude-haiku-5-5', { relevant: true, reason: 'Looks relevant' }));
-    extract.mockResolvedValue(reply('claude-opus-5-5', null, 'refusal'));
+    screen.mockResolvedValue(reply({ relevant: true, reason: 'Looks relevant' }));
+    extract.mockResolvedValue(reply(null));
 
     await expect(extraction.extract(page.id)).resolves.toEqual({ status: 'FAILED', opportunities: 0 });
   });
 
   it('does not call Claude again for a page that was already processed', async () => {
     const page = await addPage('/again');
-    screen.mockResolvedValue(reply('claude-haiku-5-5', { relevant: false, reason: 'Course page' }));
+    screen.mockResolvedValue(reply({ relevant: false, reason: 'Course page' }));
     await extraction.extract(page.id);
     screen.mockClear();
 
@@ -137,19 +143,18 @@ describe('Extraction (e2e)', () => {
     expect(screen).not.toHaveBeenCalled();
   });
 
-  it('keeps the page unread and pauses extraction when credit runs out', async () => {
-    const page = await addPage('/no-credit');
-    screen.mockRejectedValue(
-      new Anthropic.BadRequestError(400, undefined, 'Your credit balance is too low to access the Anthropic API.', new Headers()),
-    );
-    const queue = app.get<Queue>(getQueueToken(EXTRACT_QUEUE));
+  it('retries rate limits and only fails a page for a page-specific error', async () => {
+    const processor = app.get(ExtractProcessor);
+    const busy = await addPage('/rate-limited');
+    screen.mockRejectedValueOnce(new ApiError({ message: 'Resource has been exhausted', status: 429 }));
+    await expect(processor.process({ data: { rawPageId: busy.id } } as Job<ExtractJob>)).rejects.toThrow('exhausted');
+    expect((await prisma.rawPage.findUniqueOrThrow({ where: { id: busy.id } })).extractionStatus).toBe('PENDING');
 
-    const job = { data: { rawPageId: page.id } } as Job<ExtractJob>;
-    await expect(app.get(ExtractProcessor).process(job)).rejects.toThrow('credit balance');
-
-    const unchanged = await prisma.rawPage.findUniqueOrThrow({ where: { id: page.id } });
-    expect(unchanged.extractionStatus).toBe('PENDING');
-    expect(await queue.isPaused()).toBe(true);
-    await queue.resume();
+    const broken = await addPage('/bad-request');
+    screen.mockRejectedValueOnce(new ApiError({ message: 'Request contains an invalid argument', status: 400 }));
+    await expect(processor.process({ data: { rawPageId: broken.id } } as Job<ExtractJob>)).resolves.toEqual({
+      status: 'FAILED',
+      opportunities: 0,
+    });
   });
 });
