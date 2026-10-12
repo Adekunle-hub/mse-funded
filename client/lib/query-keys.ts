@@ -6,4 +6,5 @@ export const queryKeys = {
   adminReports: ["admin-reports"],
   adminListings: ["admin-listings"],
   adminSources: ["admin-sources"],
+  assistantChats: ["assistant-chats"],
 } as const
