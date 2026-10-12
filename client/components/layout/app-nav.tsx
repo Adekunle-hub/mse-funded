@@ -23,6 +23,7 @@ export function AppNav({ className }: { className?: string }) {
   const links = [
     { href: routes.scholarships, label: "Scholarships", active: pathname.startsWith(routes.scholarships) },
     { href: routes.tracker, label: "Saved", active: pathname.startsWith(routes.tracker), count: true },
+    { href: routes.assistant, label: "Ask AI", active: pathname.startsWith(routes.assistant) },
   ]
 
   return (
@@ -35,12 +36,7 @@ export function AppNav({ className }: { className?: string }) {
               aria-current={link.active ? "page" : undefined}
               className="group inline-flex items-center gap-2 type-button text-ink"
             >
-              <span
-                className={cn(
-                  "underline-offset-8 group-hover:underline",
-                  link.active && "underline decoration-2"
-                )}
-              >
+              <span className={cn("underline-offset-8 group-hover:underline", link.active && "underline decoration-2")}>
                 {link.label}
               </span>
               {link.count && <SavedCount />}
