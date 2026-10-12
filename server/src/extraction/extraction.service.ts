@@ -1,48 +1,46 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod';
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
+import { GoogleGenAI } from '@google/genai';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import type { Queue } from 'bullmq';
+import { z } from 'zod';
 
 import type { ExtractionStatus, Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { EXTRACT_QUEUE, type ExtractJob } from '../queues.js';
 import { ExtractionSchema, ScreeningSchema, type Opportunity } from './extraction.schema.js';
-import { pageText } from './page-text.js';
+import { READER_CONTENT_TYPE } from '../crawler/reader.js';
+import { mentionsFundedStudy, NO_FUNDED_STUDY, pageText } from './page-text.js';
 
-const SCREEN_MODEL = 'claude-haiku-5-5';
-const EXTRACT_MODEL = 'claude-opus-5-5';
+const SCREEN_MODEL = 'gemini-3.5-flash-lite';
+const EXTRACT_MODEL = 'gemini-3.5-flash';
 const MAX_TEXT_CHARS = 100_000;
 
-const SCREEN_PROMPT = `You screen web pages for MseFunded, a site that lists funded MSc and PhD places in materials science and engineering: metallurgy, polymers, ceramics, composites, corrosion, nanomaterials, biomaterials, electronic, energy and battery materials, and closely related materials topics.
+const SCREEN_PROMPT = `You screen web pages for MseFunded, a site that lists funded MSc and PhD places in materials science and engineering: metallurgy, polymers, ceramics, composites, corrosion, nanomaterials, biomaterials, electronic, energy and battery materials, manufacturing (such as additive manufacturing, welding and materials processing), sustainable energy (such as solar, hydrogen, batteries, fuel cells and carbon capture), and closely related topics.
 
 Answer relevant = true when the page offers at least one of these:
-- a specific funded MSc or PhD place, studentship, scholarship or graduate assistantship in materials science or a closely related materials topic
+- a specific funded MSc or PhD place, studentship, scholarship or graduate assistantship in materials science, manufacturing, sustainable energy or a closely related topic
 - a funded MSc or PhD scholarship programme open to many fields that include engineering or the physical sciences, such as Chevening, Commonwealth, Erasmus Mundus, Mastercard Foundation, DAAD or Fulbright
 
 Answer relevant = false for course pages with no funding, staff or postdoc jobs, news, and funding limited to unrelated fields such as medicine or law. When you are unsure, answer relevant = true so a more careful review can check it. Keep the reason to one sentence.`;
 
 const EXTRACT_PROMPT = `You extract funded MSc and PhD opportunities in materials science and engineering from web pages for MseFunded, a site used by Nigerian materials science students.
 
-List every funded MSc or PhD opportunity that the page describes in materials science or a closely related materials topic, and every funded MSc or PhD scholarship programme open to many fields that include engineering or the physical sciences. Return an empty list if there are none.
+List every funded MSc or PhD opportunity that the page describes in materials science, manufacturing, sustainable energy or a closely related topic, and every funded MSc or PhD scholarship programme open to many fields that include engineering or the physical sciences. Return an empty list if there are none.
 
 Rules:
 - Use only what the page states. Use null when something is not stated. Never guess.
 - Write dates as YYYY-MM-DD. deadlineTimeZone is an IANA time zone such as Europe/London, only when the page gives one.
-- materialsFocus is core when the project is mainly materials science or engineering, related when materials are a large part of it, general when it is a scholarship programme open to many fields that include engineering or the physical sciences, and unrelated otherwise (for example a medical, biology or pure software project).
+- materialsFocus is core when the project is mainly materials science or engineering, manufacturing, or sustainable energy, related when materials are a large part of it, general when it is a scholarship programme open to many fields that include engineering or the physical sciences, and unrelated otherwise (for example a medical, biology or pure software project).
 - country is the host country. Use Multiple countries when the programme runs in several countries, and null only when the page does not say.
 - level is MSC, PHD, or MSC_PHD when both are offered.
 - fundingType is FULLY_FUNDED when tuition and a living stipend are both covered, TUITION_ONLY, STIPEND_ONLY, or PARTIAL.
 - openToNigerians is true when international or Nigerian applicants can apply, false when the funding is limited to others (for example UK home fee status only), and null when the page does not say.
-- fields are short materials topics such as Polymers or Corrosion.
+- fields are short topics such as Polymers, Corrosion, Manufacturing or Sustainable energy.
 - summary is two or three plain sentences about the project or programme.
 - officialUrl is the link to the advert or application page when the page gives one.`;
 
 export type ExtractionResult = { status: ExtractionStatus | 'MISSING'; opportunities: number };
-
-type UsageSource = { model: string; usage: { input_tokens: number; output_tokens: number } };
 
 function toDeadline(value: string | null): Date | null {
   if (!value) return null;
@@ -56,7 +54,7 @@ export class ExtractionService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly anthropic: Anthropic,
+    private readonly ai: GoogleGenAI,
     @InjectQueue(EXTRACT_QUEUE) private readonly extractQueue: Queue<ExtractJob>,
   ) {}
 
@@ -81,46 +79,26 @@ export class ExtractionService {
     if (!page) return { status: 'MISSING', opportunities: 0 };
     if (page.extractionStatus !== 'PENDING') return { status: page.extractionStatus, opportunities: 0 };
 
-    const text = pageText(page.body);
+    const text = page.contentType === READER_CONTENT_TYPE ? page.body : pageText(page.body);
     if (text.length > MAX_TEXT_CHARS) {
       return this.finish(page.id, 'FAILED', `Page text is too long (${text.length} characters)`);
+    }
+
+    if (!mentionsFundedStudy(text)) {
+      return this.finish(page.id, 'NOT_A_SCHOLARSHIP', NO_FUNDED_STUDY);
     }
 
     const url = page.finalUrl ?? page.url;
     const content = `Page URL: ${url}\n\n${text}`;
 
-    const screening = await this.anthropic.messages.parse({
-      model: SCREEN_MODEL,
-      max_tokens: 4096,
-      system: SCREEN_PROMPT,
-      output_config: { effort: 'low', format: zodOutputFormat(ScreeningSchema) },
-      messages: [{ role: 'user', content }],
-    });
-    await this.recordUsage(page.id, 'screen', screening);
+    const screening = await this.ask(page.id, 'screen', SCREEN_MODEL, SCREEN_PROMPT, ScreeningSchema, content);
+    if (!screening) return this.finish(page.id, 'FAILED', 'Screening gave no usable answer');
+    if (!screening.relevant) return this.finish(page.id, 'NOT_A_SCHOLARSHIP', screening.reason);
 
-    if (screening.stop_reason === 'refusal' || !screening.parsed_output) {
-      return this.finish(page.id, 'FAILED', `Screening gave no answer (${screening.stop_reason})`);
-    }
-    if (!screening.parsed_output.relevant) {
-      return this.finish(page.id, 'NOT_A_SCHOLARSHIP', screening.parsed_output.reason);
-    }
+    const extraction = await this.ask(page.id, 'extract', EXTRACT_MODEL, EXTRACT_PROMPT, ExtractionSchema, content);
+    if (!extraction) return this.finish(page.id, 'FAILED', 'Extraction gave no usable answer');
 
-    const extraction = await this.anthropic.beta.messages.parse({
-      model: EXTRACT_MODEL,
-      max_tokens: 16000,
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      system: EXTRACT_PROMPT,
-      output_config: { effort: 'medium', format: betaZodOutputFormat(ExtractionSchema) },
-      messages: [{ role: 'user', content }],
-    });
-    await this.recordUsage(page.id, 'extract', extraction);
-
-    if (extraction.stop_reason === 'refusal' || !extraction.parsed_output) {
-      return this.finish(page.id, 'FAILED', `Extraction gave no answer (${extraction.stop_reason})`);
-    }
-
-    const { opportunities } = extraction.parsed_output;
+    const { opportunities } = extraction;
     if (opportunities.length === 0) {
       return this.finish(page.id, 'NOT_A_SCHOLARSHIP', 'No funded MSc or PhD opportunity found');
     }
@@ -155,16 +133,37 @@ export class ExtractionService {
     };
   }
 
-  private async recordUsage(rawPageId: string, stage: string, response: UsageSource): Promise<void> {
+  private async ask<T>(
+    rawPageId: string,
+    stage: string,
+    model: string,
+    systemInstruction: string,
+    schema: z.ZodType<T>,
+    content: string,
+  ): Promise<T | null> {
+    const response = await this.ai.models.generateContent({
+      model,
+      contents: content,
+      config: { systemInstruction, responseMimeType: 'application/json', responseJsonSchema: z.toJSONSchema(schema) },
+    });
+
+    const usage = response.usageMetadata;
     await this.prisma.llmUsage.create({
       data: {
         rawPageId,
         stage,
-        model: response.model,
-        inputTokens: response.usage.input_tokens,
-        outputTokens: response.usage.output_tokens,
+        model,
+        inputTokens: usage?.promptTokenCount ?? 0,
+        outputTokens: (usage?.candidatesTokenCount ?? 0) + (usage?.thoughtsTokenCount ?? 0),
       },
     });
+
+    try {
+      const parsed = schema.safeParse(JSON.parse(response.text ?? ''));
+      return parsed.success ? parsed.data : null;
+    } catch {
+      return null;
+    }
   }
 
   private async finish(rawPageId: string, status: ExtractionStatus, note: string | null): Promise<ExtractionResult> {
