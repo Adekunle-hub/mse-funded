@@ -1,5 +1,6 @@
 import Image from "next/image"
 
+import { apiUrl } from "@/lib/api/client"
 import { cn } from "@/lib/utils"
 
 function avatarUrl(name: string) {
@@ -13,19 +14,20 @@ function avatarUrl(name: string) {
 
 type UserAvatarProps = {
   name: string
+  imageUrl?: string | null
   size?: number
   className?: string
 }
 
-export function UserAvatar({ name, size = 36, className }: UserAvatarProps) {
+export function UserAvatar({ name, imageUrl, size = 36, className }: UserAvatarProps) {
   return (
     <Image
-      src={avatarUrl(name)}
+      src={imageUrl ? apiUrl(imageUrl) : avatarUrl(name)}
       alt=""
       width={size}
       height={size}
       unoptimized
-      className={cn("shrink-0 rounded-md border border-hairline bg-mint", className)}
+      className={cn("shrink-0 rounded-md border border-hairline bg-mint object-cover", className)}
     />
   )
 }
