@@ -10,6 +10,7 @@ import type { Opportunity } from './../src/extraction/extraction.schema.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
 import type { RecheckJob, VerifyJob } from './../src/queues.js';
 import { ScholarshipsService } from './../src/scholarships/scholarships.service.js';
+import { fieldsFor } from './../src/verification/listing.js';
 import { TemporaryLinkError, VerificationService } from './../src/verification/verification.service.js';
 import { VerifyProcessor } from './../src/verification/verify.processor.js';
 
@@ -78,6 +79,15 @@ describe('Verification (e2e)', () => {
       data: { rawPageId, title: opportunity.title, institution: opportunity.institution, level: opportunity.level, deadline, data: opportunity },
     });
   };
+
+  it('tags manufacturing and sustainable energy listings', () => {
+    const tags = (title: string, fields: string[] = [], materialsFocus = 'core') =>
+      fieldsFor({ title, fields, materialsFocus } as unknown as Opportunity);
+    expect(tags('Funded PhD in additive manufacturing of battery electrodes')).toEqual(['Manufacturing', 'Sustainable energy']);
+    expect(tags('MSc scholarship in welding of steel')).toEqual(['Metals', 'Manufacturing']);
+    expect(tags('PhD studentship', ['Hydrogen storage'])).toEqual(['Sustainable energy']);
+    expect(tags('Chevening Scholarships', ['Engineering', 'Energy'], 'general')).toEqual([]);
+  });
 
   it('rejects closed posts, other topics, posts not open to Nigerians and broken links', async () => {
     const closed = await addOpportunity({ title: `Closed ${RUN}` }, new Date('2020-01-01'));
