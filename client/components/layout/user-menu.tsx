@@ -42,14 +42,14 @@ export function UserMenu({ swapSignUpColor = false }: { swapSignUpColor?: boolea
         aria-label={`Account menu for ${user.name}`}
         className="flex items-center gap-2 rounded-md p-1 pr-2 hover:bg-muted-bg data-popup-open:bg-muted-bg"
       >
-        <UserAvatar name={user.name} />
+        <UserAvatar name={user.name} imageUrl={user.avatarUrl} />
         <ChevronDown aria-hidden="true" className="size-4 text-ink-muted" />
       </Menu.Trigger>
       <Menu.Portal>
         <Menu.Positioner side="bottom" align="end" sideOffset={8} className="z-50">
           <Menu.Popup className="w-60 rounded-md border border-hairline bg-surface p-1.5 outline-none">
             <div className="flex items-center gap-2.5 border-b border-hairline px-2.5 pt-1.5 pb-3">
-              <UserAvatar name={user.name} size={32} />
+              <UserAvatar name={user.name} imageUrl={user.avatarUrl} size={32} />
               <div className="min-w-0">
                 <p className="truncate type-label text-ink">{user.name}</p>
                 <p className="truncate type-body-sm text-ink-muted">{user.email}</p>
@@ -97,7 +97,7 @@ export function MobileUserLink() {
 
   return (
     <Link href={routes.account} aria-label="Your account" className="inline-flex size-12 items-center justify-center">
-      <UserAvatar name={user.name} />
+      <UserAvatar name={user.name} imageUrl={user.avatarUrl} />
     </Link>
   )
 }
