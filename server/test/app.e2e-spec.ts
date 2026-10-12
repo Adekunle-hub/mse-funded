@@ -207,7 +207,7 @@ describe('MseFunded API (e2e)', () => {
     expect(summary.body).toMatchObject({
       listings: { live: expect.any(Number) },
       pages: { waiting: expect.any(Number) },
-      claudeSpend: { totalUsd: expect.any(Number) },
+      ai: { callsTotal: expect.any(Number) },
     });
     await prisma.user.update({ where: { email }, data: { role: 'STUDENT' } });
   });
