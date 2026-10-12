@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -13,10 +13,10 @@ import { ExtractionService } from './extraction.service.js';
   imports: [BullModule.registerQueue({ name: EXTRACT_QUEUE })],
   providers: [
     {
-      provide: Anthropic,
+      provide: GoogleGenAI,
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) =>
-        new Anthropic({ apiKey: config.get('ANTHROPIC_API_KEY', { infer: true }) || null }),
+        new GoogleGenAI({ apiKey: config.get('GEMINI_API_KEY', { infer: true }) || undefined }),
     },
     ExtractionService,
     ...(runWorkers ? [ExtractProcessor] : []),
