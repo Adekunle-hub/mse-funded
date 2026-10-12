@@ -7,11 +7,13 @@ import { Cron } from '@nestjs/schedule';
 import type { Queue } from 'bullmq';
 
 import type { Env } from '../config/env.js';
+import { mentionsFundedStudy, NO_FUNDED_STUDY, pageText } from '../extraction/page-text.js';
 import type { Source } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CRAWL_QUEUE, EXTRACT_QUEUE, type CrawlJob, type ExtractJob } from '../queues.js';
 import { SourcesService, type CrawlResult } from '../sources/sources.service.js';
 import { findPostLinks } from './links.js';
+import { needsReader, READER_CONTENT_TYPE, readWithJina } from './reader.js';
 import { checkRobots } from './robots.js';
 import { botUserAgent } from './user-agent.js';
 
@@ -25,6 +27,7 @@ export type SourceCrawl = { result: CrawlResult; saved: boolean; discovered: num
 export class CrawlerService {
   private readonly logger = new Logger(CrawlerService.name);
   private readonly userAgent: string;
+  private readonly jinaKey: string | undefined;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -35,6 +38,7 @@ export class CrawlerService {
   ) {
     const site = config.get('CLIENT_ORIGIN', { infer: true })[0];
     this.userAgent = botUserAgent(site);
+    this.jinaKey = config.get('JINA_API_KEY', { infer: true }) || undefined;
   }
 
   @Cron('*/15 * * * *')
@@ -74,8 +78,12 @@ export class CrawlerService {
         return this.failure(response.status, `Unsupported content type ${contentType}`, true);
       }
 
-      const body = await response.text();
-      if (body.length > MAX_BODY_CHARS) return this.failure(response.status, 'Page is larger than 2 MB', true);
+      const html = await response.text();
+      if (html.length > MAX_BODY_CHARS) return this.failure(response.status, 'Page is larger than 2 MB', true);
+
+      const readerText = needsReader(html) ? await readWithJina(response.url, this.jinaKey) : null;
+      const body = readerText ?? html;
+      const worthReading = mentionsFundedStudy(readerText ?? pageText(html));
 
       const [page] = await this.prisma.rawPage.createManyAndReturn({
         data: {
@@ -83,15 +91,18 @@ export class CrawlerService {
           url: source.url,
           finalUrl: response.url,
           httpStatus: response.status,
-          contentType,
+          contentType: readerText ? READER_CONTENT_TYPE : contentType,
           contentHash: createHash('sha256').update(body).digest('hex'),
           body,
+          ...(worthReading
+            ? {}
+            : { extractionStatus: 'NOT_A_SCHOLARSHIP', extractionError: NO_FUNDED_STUDY, extractedAt: new Date() }),
         },
         skipDuplicates: true,
         select: { id: true },
       });
 
-      if (page) {
+      if (page && worthReading) {
         await this.extractQueue.add(
           'extract',
           { rawPageId: page.id },
@@ -100,7 +111,7 @@ export class CrawlerService {
       }
 
       const discovered =
-        source.kind === 'LISTING' ? await this.sources.addDiscovered(findPostLinks(body, response.url), 'LISTING') : 0;
+        source.kind === 'LISTING' ? await this.sources.addDiscovered(findPostLinks(html, response.url), 'LISTING') : 0;
 
       return { result: { status: response.status, error: null, robotsAllowed: true }, saved: Boolean(page), discovered };
     } catch (error) {
