@@ -22,7 +22,7 @@ export function FieldExplorer({ snapshot }: { snapshot: LandingSnapshot }) {
           title="Find your corner of materials science"
           description="From polymer chains to corrosion pits. Pick your field to see what is funded right now."
         />
-        <RevealStagger as="ul" className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2 lg:mt-12 lg:grid-cols-3 lg:gap-5">
+        <RevealStagger as="ul" className="mt-6 grid gap-3 sm:mt-8 sm:grid-cols-2 lg:mt-12 lg:grid-cols-4 lg:gap-5">
           {fieldGuide.map((field, index) => {
             const count = snapshot.fieldCounts[field.name] ?? 0
             return (
