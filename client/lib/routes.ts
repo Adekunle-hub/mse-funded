@@ -3,6 +3,7 @@ export const routes = {
   scholarships: "/scholarships",
   scholarship: (id: string) => `/scholarships/${encodeURIComponent(id)}`,
   tracker: "/tracker",
+  assistant: "/assistant",
   login: "/login",
   signup: "/signup",
   account: "/account",
@@ -31,6 +32,7 @@ export type NavLink = { label: string; href: string }
 
 export const mainNav: NavLink[] = [
   { label: "Scholarships", href: routes.scholarships },
+  { label: "Ask AI", href: routes.assistant },
   { label: "How it works", href: routes.howItWorks },
   { label: "How we check", href: routes.howWeCheck },
   { label: "About", href: routes.about },
