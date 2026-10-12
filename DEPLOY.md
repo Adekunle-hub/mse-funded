@@ -54,7 +54,8 @@ Add the two records Render and Vercel showed you (both are `CNAME` records):
 ## 6. Background jobs: GitHub
 In the GitHub repo open **Settings > Secrets and variables > Actions > New repository secret** and add:
 - `DATABASE_URL`, `JWT_SECRET`, `REVALIDATE_SECRET`: from `.env.production`
-- `ANTHROPIC_API_KEY`, `TAVILY_API_KEY`, `RESEND_API_KEY`: from `server/.env`
+- `GEMINI_API_KEY`, `TAVILY_API_KEY`, `RESEND_API_KEY`: from `server/.env`
+- Optional: `EXA_API_KEY` (a second search engine) and `JINA_API_KEY` (faster Jina Reader). Everything works without them.
 
 Then open **Actions > Background jobs > Run workflow** once to test it.
 
@@ -62,7 +63,7 @@ The timetable (Lagos time):
 
 | When | Job |
 |---|---|
-| Every 3 hours | crawl, read with Claude, verify |
+| Every 3 hours | crawl, read with Gemini, verify |
 | 05:00 | re-check live listings |
 | 06:00 | discover new pages |
 | 08:00 | deadline reminders, then clean up old page copies |
