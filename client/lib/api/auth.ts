@@ -1,6 +1,14 @@
 import { ApiError, apiFetch } from "@/lib/api/client"
 
-export type User = { id: string; name: string; email: string; isAdmin: boolean }
+export type User = {
+  id: string
+  name: string
+  email: string
+  isAdmin: boolean
+  memberSince: string
+  avatarUrl: string | null
+  signInMethods: { password: boolean; google: boolean }
+}
 export type LoginInput = { email: string; password: string }
 export type SignupInput = LoginInput & { name: string }
 
@@ -34,4 +42,16 @@ export async function resetPassword(input: { token: string; password: string }):
 
 export async function logout(): Promise<void> {
   await apiFetch("/auth/logout", { method: "POST" })
+}
+
+export async function uploadAvatar(picture: Blob): Promise<User> {
+  const form = new FormData()
+  form.append("file", picture, "avatar.jpg")
+  const { user } = await apiFetch<{ user: User }>("/me/avatar", { method: "PUT", body: form })
+  return user
+}
+
+export async function removeAvatar(): Promise<User> {
+  const { user } = await apiFetch<{ user: User }>("/me/avatar", { method: "DELETE" })
+  return user
 }
