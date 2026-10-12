@@ -173,6 +173,71 @@ function Corrosion() {
   )
 }
 
+function Manufacturing() {
+  const layers = [0, 1, 2, 3, 4]
+  return (
+    <Frame fill={false}>
+      {layers.map((layer) => (
+        <rect
+          key={layer}
+          x={40 + layer * 2}
+          y={80 - layer * 9}
+          width={80 - layer * 4}
+          height="7"
+          rx="1"
+          fill={layer % 2 ? "var(--mint)" : "var(--cream)"}
+          stroke={TEAL}
+          strokeWidth="1.2"
+        />
+      ))}
+      <g className="group-hover:float-y">
+        <rect x="70" y="14" width="20" height="14" rx="2" fill={PLUM} />
+        <path d="M74 28 H86 L80 36 Z" fill={INK} fillOpacity="0.6" />
+      </g>
+      <line x1="20" x2="140" y1="10" y2="10" stroke={INK} strokeOpacity="0.3" strokeWidth="1.2" />
+    </Frame>
+  )
+}
+
+function SustainableEnergy() {
+  const rays = Array.from({ length: 8 }, (_, index) => (index * Math.PI) / 4)
+  const cells = Array.from({ length: 8 }, (_, index) => [64 + (index % 4) * 20, 54 + Math.floor(index / 4) * 16])
+  return (
+    <Frame fill={false}>
+      <g className="group-hover:float-y">
+        <circle cx="34" cy="30" r="10" fill="var(--amber-ink)" fillOpacity="0.8" />
+        {rays.map((angle) => (
+          <line
+            key={angle}
+            x1={34 + Math.cos(angle) * 14}
+            y1={30 + Math.sin(angle) * 14}
+            x2={34 + Math.cos(angle) * 19}
+            y2={30 + Math.sin(angle) * 19}
+            stroke="var(--amber-ink)"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+        ))}
+      </g>
+      {cells.map(([x, y], index) => (
+        <rect
+          key={`${x}-${y}`}
+          x={x}
+          y={y}
+          width="18"
+          height="14"
+          rx="1"
+          fill={TEAL}
+          fillOpacity={index % 3 === 0 ? 0.8 : 0.55}
+          stroke={INK}
+          strokeOpacity="0.3"
+        />
+      ))}
+      <line x1="102" x2="102" y1="86" y2="96" stroke={INK} strokeOpacity="0.4" strokeWidth="1.6" />
+    </Frame>
+  )
+}
+
 const art: Record<string, () => ReactNode> = {
   Polymers,
   Ceramics,
@@ -180,6 +245,8 @@ const art: Record<string, () => ReactNode> = {
   Nanomaterials,
   Composites,
   Corrosion,
+  Manufacturing,
+  "Sustainable energy": SustainableEnergy,
 }
 
 export function FieldArt({ field }: { field: string }) {
