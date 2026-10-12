@@ -27,6 +27,7 @@ Your private values live in `.env.production` at the project root (git ignores i
 2. Fill in the values it asks for:
    - `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `REVALIDATE_SECRET`: from `.env.production`
    - `RESEND_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`: from `server/.env`
+   - `GEMINI_API_KEY`: a key for the MseFunded AI chat. Use a key from a different Google Cloud project than the GitHub one, so chat and the page reader each get their own free daily allowance.
 3. Click **Apply**. The first build takes a few minutes. Open `https://<your-service>.onrender.com/health`; it should say `"status":"ok"`.
 4. In the service, open **Settings > Custom Domains** and add `api.msefunded.orbgnost.com`. Render shows the record to create in step 5.
 
@@ -64,9 +65,9 @@ The timetable (Lagos time):
 | When | Job |
 |---|---|
 | Every 3 hours | crawl, read with Gemini, verify |
-| 05:00 | re-check live listings |
-| 06:00 | discover new pages |
-| 08:00 | deadline reminders, then clean up old page copies |
+| 05:47 | re-check live listings |
+| 06:47 | discover new pages |
+| 08:47 | deadline reminders, then clean up old page copies |
 
 GitHub pauses scheduled jobs if the repo has no commits for 60 days. Any commit restarts them.
 
