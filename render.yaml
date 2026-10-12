@@ -23,6 +23,8 @@ services:
         value: https://api.msefunded.orbgnost.com
       - key: EMAIL_FROM
         value: MseFunded <dev@orbgnost.com>
+      - key: ASSISTANT_MODEL
+        value: gemini-3.5-flash-lite
       - key: DATABASE_URL
         sync: false
       - key: REDIS_URL
@@ -32,6 +34,8 @@ services:
       - key: REVALIDATE_SECRET
         sync: false
       - key: RESEND_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
