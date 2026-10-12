@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bookmark, CircleUser, Search } from "lucide-react"
+import { Bookmark, CircleUser, Search, Sparkles } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { UserAvatar } from "@/components/auth/user-avatar"
@@ -17,15 +17,20 @@ export function TabBar() {
   const tabs: { href: string; label: string; icon: ReactNode }[] = [
     { href: routes.scholarships, label: "Search", icon: <Search aria-hidden="true" className="size-5" /> },
     { href: routes.tracker, label: "Saved", icon: <Bookmark aria-hidden="true" className="size-5" /> },
+    { href: routes.assistant, label: "Ask AI", icon: <Sparkles aria-hidden="true" className="size-5" /> },
     user
-      ? { href: routes.account, label: "Account", icon: <UserAvatar name={user.name} size={22} /> }
+      ? {
+          href: routes.account,
+          label: "Account",
+          icon: <UserAvatar name={user.name} imageUrl={user.avatarUrl} size={22} />,
+        }
       : { href: routes.login, label: "Log in", icon: <CircleUser aria-hidden="true" className="size-5" /> },
   ]
 
   return (
     <nav
       aria-label="App"
-      className="sticky bottom-0 z-40 grid grid-cols-3 border-t border-hairline bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="sticky bottom-0 z-40 grid grid-cols-4 border-t border-hairline bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       {tabs.map(({ href, label, icon }) => {
         const active = pathname.startsWith(href)
