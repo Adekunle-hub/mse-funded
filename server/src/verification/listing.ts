@@ -8,6 +8,8 @@ const FIELD_KEYWORDS: [string, RegExp][] = [
   ['Nanomaterials', /nano|2d material|graphene/i],
   ['Composites', /composite/i],
   ['Corrosion', /corrosion|coating/i],
+  ['Manufacturing', /manufactur|additive|3d print|welding|machining|forging|materials processing/i],
+  ['Sustainable energy', /sustainab|renewable|energy|solar|photovoltaic|hydrogen|fuel cell|batter|net zero|carbon capture|electrolys/i],
 ];
 
 const ZONE_LABELS: Record<string, string> = {
@@ -33,7 +35,8 @@ export function slugFor(title: string, institution: string): string {
 }
 
 export function fieldsFor(opportunity: Opportunity): string[] {
-  const text = [opportunity.title, ...opportunity.fields].join(' ');
+  const topics = opportunity.materialsFocus === 'general' ? [] : opportunity.fields;
+  const text = [opportunity.title, ...topics].join(' ');
   return FIELD_KEYWORDS.filter(([, pattern]) => pattern.test(text)).map(([field]) => field);
 }
 
