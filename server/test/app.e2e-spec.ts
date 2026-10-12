@@ -140,7 +140,13 @@ describe('MseFunded API (e2e)', () => {
     const agent = request.agent(app.getHttpServer());
 
     const signup = await agent.post('/auth/signup').send({ name: 'Tolu Adeyemi', email, password }).expect(201);
-    expect(signup.body.user).toMatchObject({ name: 'Tolu Adeyemi', email });
+    expect(signup.body.user).toMatchObject({
+      name: 'Tolu Adeyemi',
+      email,
+      memberSince: expect.any(String),
+      signInMethods: { password: true, google: false },
+    });
+    expect(signup.body.user).not.toHaveProperty('passwordHash');
     expect(signup.headers['set-cookie']).toEqual(
       expect.arrayContaining([
         expect.stringMatching(/^access_token=.+Path=\/;.+HttpOnly/),
