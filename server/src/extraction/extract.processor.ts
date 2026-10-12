@@ -1,23 +1,17 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { InjectQueue, Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
-import type { Job, Queue } from 'bullmq';
+import { ApiError } from '@google/genai';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import type { Job } from 'bullmq';
 
 import { EXTRACT_QUEUE, type ExtractJob } from '../queues.js';
 import { ExtractionService, type ExtractionResult } from './extraction.service.js';
 
-export function isOutOfCredit(error: unknown): boolean {
-  return error instanceof Anthropic.BadRequestError && /credit balance/i.test(error.message);
+export function isPageProblem(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 400 && !/api key/i.test(error.message);
 }
 
-@Processor(EXTRACT_QUEUE, { concurrency: 2, limiter: { max: 30, duration: 60_000 } })
+@Processor(EXTRACT_QUEUE, { concurrency: 1, limiter: { max: 8, duration: 60_000 } })
 export class ExtractProcessor extends WorkerHost {
-  private readonly logger = new Logger(ExtractProcessor.name);
-
-  constructor(
-    private readonly extraction: ExtractionService,
-    @InjectQueue(EXTRACT_QUEUE) private readonly extractQueue: Queue<ExtractJob>,
-  ) {
+  constructor(private readonly extraction: ExtractionService) {
     super();
   }
 
@@ -25,13 +19,8 @@ export class ExtractProcessor extends WorkerHost {
     try {
       return await this.extraction.extract(job.data.rawPageId);
     } catch (error) {
-      if (isOutOfCredit(error)) {
-        await this.extractQueue.pause();
-        this.logger.error('Anthropic credit has run out. Extraction is paused. Top up, then run npm run extract to resume.');
-        throw error;
-      }
-      if (error instanceof Anthropic.BadRequestError) {
-        await this.extraction.markFailed(job.data.rawPageId, error.message);
+      if (isPageProblem(error)) {
+        await this.extraction.markFailed(job.data.rawPageId, error instanceof Error ? error.message : String(error));
         return { status: 'FAILED', opportunities: 0 };
       }
       throw error;
