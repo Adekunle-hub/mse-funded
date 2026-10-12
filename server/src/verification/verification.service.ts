@@ -7,7 +7,7 @@ import type { Queue } from 'bullmq';
 import type { Env } from '../config/env.js';
 import { botUserAgent } from '../crawler/user-agent.js';
 import type { Opportunity } from '../extraction/extraction.schema.js';
-import type { ReviewStatus } from '../generated/prisma/client.js';
+import type { ExtractedOpportunity, ReviewStatus } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { VERIFY_QUEUE, type RecheckJob, type VerifyJob } from '../queues.js';
 import { WebsiteService } from '../website/website.service.js';
@@ -20,6 +20,8 @@ type LinkCheck = 'ok' | 'broken' | 'unconfirmed' | 'temporary';
 export type RecheckResult = 'CHECKED' | 'REMOVED' | 'UNCHANGED' | 'MISSING';
 
 export class TemporaryLinkError extends Error {}
+
+export type ReviewChanges = { officialUrl?: string; deadline?: Date | null };
 
 @Injectable()
 export class VerificationService {
@@ -78,7 +80,27 @@ export class VerificationService {
     if (link === 'broken') return this.finish(row.id, 'REJECTED', 'The official link is broken');
     if (link === 'unconfirmed') return this.finish(row.id, 'NEEDS_REVIEW', 'The official link could not be opened');
 
-    const listing = toScholarship(row, { ...opportunity, officialUrl }, row.deadline);
+    return this.publish(row, { ...opportunity, officialUrl }, row.deadline);
+  }
+
+  async approve(opportunityId: string, changes: ReviewChanges): Promise<ReviewStatus | 'MISSING'> {
+    const row = await this.prisma.extractedOpportunity.findUnique({ where: { id: opportunityId } });
+    if (!row || row.status !== 'NEEDS_REVIEW') return 'MISSING';
+
+    const opportunity = row.data as unknown as Opportunity;
+    const officialUrl = changes.officialUrl ?? opportunity.officialUrl ?? '';
+    const deadline = changes.deadline === undefined ? row.deadline : changes.deadline;
+    return this.publish(row, { ...opportunity, officialUrl }, deadline);
+  }
+
+  async reject(opportunityId: string): Promise<ReviewStatus | 'MISSING'> {
+    const row = await this.prisma.extractedOpportunity.findUnique({ where: { id: opportunityId }, select: { status: true } });
+    if (!row || row.status !== 'NEEDS_REVIEW') return 'MISSING';
+    return this.finish(opportunityId, 'REJECTED', 'Rejected by an admin');
+  }
+
+  private async publish(row: ExtractedOpportunity, opportunity: Opportunity, deadline: Date | null): Promise<ReviewStatus> {
+    const listing = toScholarship(row, opportunity, deadline);
     const existing = await this.prisma.scholarship.findFirst({
       where: {
         OR: [{ slug: listing.slug }, { funder: listing.funder, name: listing.name, intakeYear: listing.intakeYear }],
