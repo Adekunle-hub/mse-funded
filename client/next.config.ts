@@ -12,6 +12,15 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://msefunded-api.onrender.com/:path*',
+      },
+    ];
+  },
+  
 };
 
 export default nextConfig;

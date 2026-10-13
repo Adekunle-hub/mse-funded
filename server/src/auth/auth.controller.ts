@@ -54,10 +54,11 @@ export class AuthController {
     config: ConfigService<Env, true>,
   ) {
     this.siteUrl = config.get('CLIENT_ORIGIN', { infer: true })[0];
+    const isProd = config.get('NODE_ENV', { infer: true }) === 'production';
     const base: CookieOptions = {
       httpOnly: true,
-      sameSite: 'none',
-      secure: config.get('NODE_ENV', { infer: true }) === 'production',
+      sameSite:'lax',
+      secure:isProd,
     };
     this.accessCookie = {
       ...base,
