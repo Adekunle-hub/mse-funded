@@ -15,16 +15,32 @@ export class ApiError extends Error {
 }
 
 function buildUrl(path: string, query?: QueryParams) {
-  const url = new URL(path.replace(/^\//, ""), apiBaseUrl.endsWith("/") ? apiBaseUrl : `${apiBaseUrl}/`)
+  const cleanPath = path.replace(/^\//, "");
+  let base: string;
+
+  if (typeof window !== "undefined") {
+  
+    base = apiBaseUrl.startsWith("http")
+      ? apiBaseUrl
+      : `${window.location.origin}${apiBaseUrl.startsWith("/") ? "" : "/"}${apiBaseUrl}`;
+  } else {
+    
+    base = process.env.NEXT_PUBLIC_RENDER_API_URL! 
+  }
+
+  // Ensure base ends with a trailing slash for URL constructor
+  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+  const url = new URL(cleanPath, normalizedBase);
+
   for (const [key, raw] of Object.entries(query ?? {})) {
-    const values = Array.isArray(raw) ? raw : [raw]
+    const values = Array.isArray(raw) ? raw : [raw];
     for (const value of values) {
       if (value !== undefined && value !== null && value !== "") {
-        url.searchParams.append(key, String(value))
+        url.searchParams.append(key, String(value));
       }
     }
   }
-  return url
+  return url;
 }
 
 async function readBody(response: Response) {
