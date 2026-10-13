@@ -56,7 +56,7 @@ export class AuthController {
     this.siteUrl = config.get('CLIENT_ORIGIN', { infer: true })[0];
     const base: CookieOptions = {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'none',
       secure: config.get('NODE_ENV', { infer: true }) === 'production',
     };
     this.accessCookie = {
