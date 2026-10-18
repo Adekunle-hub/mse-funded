@@ -60,6 +60,7 @@ export class ExtractionService {
 
   @Cron('*/15 * * * *')
   async enqueuePending(): Promise<number> {
+    await this.extractQueue.resume();
     const pending = await this.prisma.rawPage.findMany({ where: { extractionStatus: 'PENDING' }, select: { id: true } });
 
     for (const { id } of pending) {
