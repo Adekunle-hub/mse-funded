@@ -1,29 +1,32 @@
 import { cn } from "@/lib/utils"
 
-const HEX_RADIUS = 8.6
-const hexPoints = Array.from({ length: 6 }, (_, index) => {
-  const angle = (Math.PI / 3) * index - Math.PI / 2
-  return [16 + HEX_RADIUS * Math.cos(angle), 16 + HEX_RADIUS * Math.sin(angle)] as const
-})
-const hexPath = `M${hexPoints.map(([x, y]) => `${x.toFixed(2)} ${y.toFixed(2)}`).join("L")}Z`
+const outerAtoms = [
+  [16, 46],
+  [16, 19],
+  [48, 19],
+  [48, 46],
+] as const
 
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" aria-hidden="true" className={cn("size-8 shrink-0", className)}>
-      <rect width="32" height="32" rx="6" className="fill-teal" />
-      <g className="origin-center transition-transform duration-500 ease-[cubic-bezier(.2,.8,.2,1)] [transform-box:view-box] group-hover:rotate-60">
-        <path d={hexPath} fill="none" stroke="white" strokeOpacity="0.9" strokeWidth="1.4" strokeLinejoin="round" />
-        {hexPoints.map(([x, y]) => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r="1.7" className="fill-mint" />
-        ))}
-      </g>
+    <svg viewBox="0 0 64 64" aria-hidden="true" className={cn("size-8 shrink-0", className)}>
+      <rect width="64" height="64" rx="14" className="fill-teal" />
       <path
-        d="M12.2 16.3l2.6 2.6 5-5.6"
+        d="M16 46V19l16 16 16-16v27"
         fill="none"
         stroke="white"
-        strokeWidth="2"
+        strokeWidth="3.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+      {outerAtoms.map(([cx, cy]) => (
+        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4.6" className="fill-mint" />
+      ))}
+      <circle
+        cx="32"
+        cy="35"
+        r="5.4"
+        className="origin-center fill-pink transition-transform duration-300 [transform-box:fill-box] group-hover:scale-125"
       />
     </svg>
   )
