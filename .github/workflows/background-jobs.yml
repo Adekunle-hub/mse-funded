@@ -21,7 +21,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     services:
       redis:
         image: redis:7
@@ -69,12 +69,28 @@ jobs:
       - run: npm ci --include=dev
       - run: npm run build
 
-      - name: Crawl, read with Gemini and verify
+      - name: Publish what the last run read
         if: steps.task.outputs.task == 'pipeline'
-        run: |
-          npm run crawl
-          npm run extract
-          npm run verify
+        timeout-minutes: 25
+        continue-on-error: true
+        run: npm run verify
+
+      - name: Crawl sources
+        if: steps.task.outputs.task == 'pipeline'
+        timeout-minutes: 40
+        continue-on-error: true
+        run: npm run crawl
+
+      - name: Read new pages with Gemini
+        if: steps.task.outputs.task == 'pipeline'
+        timeout-minutes: 55
+        continue-on-error: true
+        run: npm run extract
+
+      - name: Publish what this run read
+        if: steps.task.outputs.task == 'pipeline'
+        timeout-minutes: 25
+        run: npm run verify
 
       - name: Re-check live listings
         if: steps.task.outputs.task == 'recheck'
