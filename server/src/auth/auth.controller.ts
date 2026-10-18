@@ -15,6 +15,7 @@ import { LoginDto } from './dto/login.dto.js';
 import { ResetPasswordDto } from './dto/reset-password.dto.js';
 import { SignupDto } from './dto/signup.dto.js';
 import { GoogleAuthService } from './google-auth.service.js';
+import { apiUrl } from '../config/urls.js';
 
 const REFRESH_COOKIE = 'refresh_token';
 const GOOGLE_COOKIE = 'google_sign_in';
@@ -55,6 +56,7 @@ export class AuthController {
   ) {
     this.siteUrl = config.get('CLIENT_ORIGIN', { infer: true })[0];
     const isProd = config.get('NODE_ENV', { infer: true }) === 'production';
+    const prefix = new URL(apiUrl(config)).pathname.replace(/\/$/, '');
     const base: CookieOptions = {
       httpOnly: true,
       sameSite:'lax',
@@ -67,10 +69,10 @@ export class AuthController {
     };
     this.refreshCookie = {
       ...base,
-      path: '/auth',
+      path: `${prefix}/auth`,
       maxAge: config.get('REFRESH_TOKEN_TTL_DAYS', { infer: true }) * DAY_MS,
     };
-    this.googleCookie = { ...base, path: '/auth/google', maxAge: 10 * MINUTE_MS };
+    this.googleCookie = { ...base, path: `${prefix}/auth/google`, maxAge: 10 * MINUTE_MS };
   }
 
   @Get('google')
