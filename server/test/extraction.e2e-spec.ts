@@ -1,7 +1,8 @@
 import { ApiError, GoogleGenAI } from '@google/genai';
+import { getQueueToken } from '@nestjs/bullmq';
 import type { INestApplicationContext } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import type { Job } from 'bullmq';
+import type { Job, Queue } from 'bullmq';
 
 import { AppModule } from './../src/app.module.js';
 import { ExtractProcessor } from './../src/extraction/extract.processor.js';
@@ -9,7 +10,7 @@ import type { Opportunity } from './../src/extraction/extraction.schema.js';
 import { ExtractionService } from './../src/extraction/extraction.service.js';
 import { pageText } from './../src/extraction/page-text.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
-import type { ExtractJob } from './../src/queues.js';
+import { EXTRACT_QUEUE, type ExtractJob } from './../src/queues.js';
 
 const PREFIX = `https://extraction-test.example/${Date.now()}`;
 
@@ -156,5 +157,21 @@ describe('Extraction (e2e)', () => {
       status: 'FAILED',
       opportunities: 0,
     });
+  });
+
+  it('pauses reading when Gemini says the daily limit is reached, and resumes on the next queueing', async () => {
+    const queue = app.get<Queue>(getQueueToken(EXTRACT_QUEUE));
+    const page = await addPage('/daily-limit');
+    screen.mockRejectedValueOnce(
+      new ApiError({ message: 'Quota exceeded: GenerateRequestsPerDayPerProjectPerModel-FreeTier', status: 429 }),
+    );
+
+    await expect(app.get(ExtractProcessor).process({ data: { rawPageId: page.id } } as Job<ExtractJob>)).rejects.toThrow('PerDay');
+    expect(await queue.isPaused()).toBe(true);
+    expect((await prisma.rawPage.findUniqueOrThrow({ where: { id: page.id } })).extractionStatus).toBe('PENDING');
+
+    await extraction.enqueuePending();
+    expect(await queue.isPaused()).toBe(false);
+    await queue.obliterate({ force: true });
   });
 });
